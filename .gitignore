@@ -1,0 +1,2 @@
+# Ignore emacs backup files (at least, the ones I generate)
+.*~

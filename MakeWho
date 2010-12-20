@@ -1,0 +1,13 @@
+#!/usr/bin/perl -n
+
+if ( m@^[ \t]*([A-Za-z_]+):[ \t]*(.*)[ \t]*$@ )
+{
+    push @assigns, qq%\$$1=$2;%;
+    push @subst, "s/__$1__/\$$1/o;";
+}
+
+END
+{
+    print "BEGIN\n{\n    ", join( "\n    ", @assigns ), "\n\}\n\n";
+    print join( "\n", @subst ), "\n";
+}
