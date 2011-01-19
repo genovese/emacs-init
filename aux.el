@@ -7,6 +7,80 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;; Calendar Mode
+
+(unless (featurep 'astronomy)
+  (require-soft 'astronomy))
+
+(when (featurep 'astronomy)
+  (defun astronomy-twilight-time-to-time-string (time-list)
+    "Converts a twilight time list as returned by
+`solar-astronomical-twilight' from astronomy.el into a time
+string. TIME-LIST is of the form (TIME ZONE) where TIME is a
+decimal time and ZONE is a string, e.g., EST. The result is
+converted into an hh:mm ZONE string. Treats the boundary case of
+a time within 30 seconds of midnight by saying \"midnight\"."
+    (let* ((hour (floor (car time-list)))
+           (min (round (* 60.0 (- (car time-list) hour))))
+           (zone (cadr time-list)))
+      (format "%s %s"
+              (if (and (= min 60) (= hour 23))
+                  "midnight"
+                (format "%02d:%02d" hour min))
+              zone)))
+
+  (defun calendar-astronomical-twilight (&optional event)
+    "Local time of astronomical twilight, morning and evening,
+for date under cursor. Accurate to a few seconds."
+    (interactive (list last-nonmenu-event))
+    (or (and calendar-latitude calendar-longitude calendar-time-zone)
+        (solar-setup))
+    (let* ((date (calendar-cursor-to-date t event))
+           (twilight (solar-astronomical-twilight date))
+           (morning (car twilight))
+           (evening (cadr twilight)))
+      (message "Astronomical twilight on %s: %s (morning) and %s (evening)"
+               (calendar-date-string date t t)
+               (astronomy-twilight-time-to-time-string morning)
+               (astronomy-twilight-time-to-time-string evening)))))
+
+(defun my-calendar-mode-hook ()
+  (local-set-key "\C-w"    'calendar-scroll-right-three-months)
+  (local-set-key "\M-p"    'calendar-backward-month)
+  (local-set-key "\M-n"    'calendar-forward-month)
+  (local-set-key "\M-w"    'calendar-beginning-of-year)
+  (local-set-key "\M-v"    'calendar-end-of-year)
+  (local-set-key "\C-\M-p" 'calendar-backward-year)
+  (local-set-key "\C-\M-n" 'calendar-forward-year)
+  (local-set-key "L"       'lunar-phases)
+  (when (featurep 'astronomy)
+    (local-set-key "T" 'calendar-astronomical-twilight))
+  )
+
+(add-hook 'calendar-mode-hook 'my-calendar-mode-hook)
+
+(setq calendar-date-display-form
+     '((when dayname (concat (substring dayname 0 3) " "))
+       (format "%02d" (string-to-number day)) " " (substring monthname 0 3) " " year))
+
+(add-hook 'calendar-today-visible-hook 'calendar-mark-today)
+
+(setq calendar-week-start-day 1)  ; Start week on monday
+
+(setq calendar-font-lock-keywords ; Change how weekends are highlighted 
+      (subst 'font-lock-keyword-face 'font-lock-comment-face calendar-font-lock-keywords))
+
+; (setq calendar-font-lock-keywords
+;       (mapcar (lambda (seq)
+;                 (let
+;                     ((sub (substitute 'font-lock-keyword-face
+;                                       'font-lock-comment-face
+;                                       (list (car seq) (cdr seq)))))
+;                   (cons (car sub) (cadr sub))))
+;               calendar-font-lock-keywords)) ; Change how weekends are highlighted 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;; Formats
 
 (defvar my-date-format "%Y %b %d %a"
@@ -86,7 +160,8 @@ Should always be defined as NIL initially.")
        (eq qualifier (with-current-buffer buf major-mode))))
     (setq ibuffer-saved-filter-groups
           `(("default"
-             ,@(ibuffer-match-my-files "Teaching" "class/" "^s")
+             ,@(when (file-directory-p (concat my-home-dir "class"))
+                 (ibuffer-match-my-files "Teaching" "class/" "^s"))
              ("Documents" (or (mode . plain-tex-mode)
                               (mode . latex-mode)
                               (mode . bibtex-mode)
@@ -94,23 +169,35 @@ Should always be defined as NIL initially.")
                               (mode-nostar . org-mode)
                               (mode-nostar . fundamental-mode)
                               (mode . nxml-mode)
-                              (mode . nxhtml-mode)))
-             ,@(ibuffer-match-my-files "Android" "Documents/" "^Eclipse")
-             ,@(ibuffer-match-my-files "Arduino" "Programming/" "^Arduino")
-             ("Code" (or (mode . cc-mode)
+                              (mode . nxhtml-mode)
+                              (mode . css-mode)))
+             ,@(when (file-directory-p (concat my-home-dir "Documents"))
+                 (ibuffer-match-my-files "Android" "Documents/" "^Eclipse"))
+             ,@(when (file-directory-p (concat my-home-dir "Programming"))
+                 (ibuffer-match-my-files "Arduino" "Programming/" "^Arduino"))
+             ("Code" (or (mode . c-mode)
                          (mode . python-mode)
                          (mode . java-mode)
                          (mode . ess-mode)
-                         (mode . js2-mode)
                          (mode . ruby-mode)
+                         (mode . clojure-mode)
+                         (mode . lisp-mode)
+                         (mode . js2-mode)
                          (mode . haskell-mode)
                          (mode . perl-mode)
+                         (mode . cperl-mode)
                          (mode . tuareg-mode)
+                         (mode . c++-mode)
+                         (mode . sh-mode)
+                         (mode . php-mode)
+                         (mode . objc-mode)
+                         (mode . processing-mode)
+                         (mode . arduino-mode)
+                         (mode . ps-mode)
                          (mode . R-mode)
                          (mode . r-mode)
                          (mode . R-transcript-mode)
                          (mode . r-transcript-mode)
-                         (mode . sh-mode)
                          (filename . "[Mm]akefile")))
              ("Emacs" (mode-nostar . emacs-lisp-mode))
              ("Shells" (or (mode . shell-mode)

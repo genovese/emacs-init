@@ -5,11 +5,11 @@
 ;; wanting to do frequently.
 ;;
 
-(defalias 'filter           'remove-if-not)
+(defalias 'filter           'remove-if-not)  ; NOTE: cl dependence
 (defalias 'foreach          'dolist)
 
 (defalias '==               'equal)
-(defalias '===              'eq)   
+(defalias '===              'eql)   
 (defalias 'num-equal        '=)   ; goes with 'string-equal
 (defalias 'num-not-equal    '/=) 
 
@@ -40,10 +40,17 @@
 (defalias 'whole-number?    'wholenump)
 (defalias 'window-alive?    'window-live-p)
 
+(defalias 'file-is-directory?            'file-directory-p)
+(defalias 'file-is-symlink?              'file-symlink-p)
+(defalias 'file-is-accessible-directory? 'file-accessible-directory-p)
+
 (dolist
     (sym '(arrayp atom bobp bolp booleanp boundp bound-and-true-p 
 		  bufferp buffer-modified-p char-or-string-p char-table-p
-		  commandp consp fboundp floatp framep functionp
+		  commandp consp fboundp file-executable-p 
+                  file-exists-p file-locked-p file-name-absolute-p
+                  file-newer-than-file-p file-readable-p file-regular-p
+                  file-writeable-p floatp framep functionp
 		  integer-or-marker-p integerp keymapp keywordp
 		  listp markerp nlistp number-or-marker-p numberp
 		  overlayp processp sequencep stringp string-lessp

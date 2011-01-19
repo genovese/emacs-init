@@ -4,13 +4,13 @@
 ;;                                                                    ;;
 ;; Emacs Initialization                                               ;;
 ;;                                                                    ;;
-;; Version:    2.5.4                                                  ;;
+;; Version:    2.5.5                                                  ;;
 ;; Author:     Christopher R. Genovese                                ;;
 ;; Maintainer: Christopher R. Genovese                                ;;
 ;;                                                                    ;;
-;; Last Updated: 2010 Dec 18 Sat 23:40                                ;;
+;; Last Updated: 2010 Dec 22 Wed 22:55                                ;;
 ;; By:           Christopher R. Genovese                              ;;
-;; Update #:     258                                                  ;;
+;; Update #:     260                                                  ;;
 ;;                                                                    ;;
 ;; Copyright (C) 2010, Christopher R. Genovese, all rights reserved.  ;;                    
 ;;                                                                    ;;
@@ -129,7 +129,10 @@
 ;; version, I am likely to transition to a two name space with slash
 ;; formulation, using pvt-crg/ and crg/  in place of my-, using my-
 ;; only for configuration variables for which that makes the most sense.
-;; I am still considering this, however.
+;; I am still considering this, however. Note also that for some
+;; hook functions, where I add lines with some frequency,
+;; I leave the closing paren on its own line for convenient adding,
+;; contrary to established lisp convention. 
 ;;
 
 

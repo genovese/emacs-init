@@ -4,6 +4,25 @@
 ;;                                                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defconst my-platform
+  (cond ((or (string-equal system-type "darwin")
+             (eq window-system 'ns)
+             (eq window-system 'mac))
+	 'macosx)
+	((or (string-equal system-type "ms-dos")
+             (string-equal system-type "windows-nt")
+	     (string-equal system-type "cygwin"))
+	 'windows)
+        (t
+         'linux))
+  "The platform on which we are currently running, derived from
+the variables `system-type' and `window-system'. Value is a
+symbol. For the moment, all *nix variants are converted to
+`linux', though this can be generalized later if needed")
+
+;; ATTN This is a bit of a mess below.
+;; Put the settings in their own functions or settings
+;; and use my-platform
 
 ;; Operating-system-specific settings
 
@@ -57,10 +76,18 @@
 ;; Mac OSX Specific Settings (see ~/.emacs.d/my-env.el for more)
 
 (when (or (eq window-system 'ns)   ; Gnu Emacs 23+ (Cocoa/NextStep)
-          (eq window-system 'mac)) ; Carbon Emacs 22
-  (if (eq window-system 'mac)
-      (message "MAC CARBON SYSTEM CHECK")
-    (message "MAC COCOA SYSTEM CHECK")) ; checking if this is sufficient
+          (eq window-system 'mac)  ; Carbon Emacs 22
+          (string-equal system-type "darwin"))
+  (when window-system
+    (if (eq window-system 'mac)
+        (message "MAC CARBON SYSTEM CHECK")
+      (message "MAC COCOA SYSTEM CHECK"))
+    (setq default-frame-alist           ; new frames after initial one
+          '((top . 48) (left . 24)   
+            (width . 180) (height . 56)
+            (cursor-color . "gray40")
+            (menu-bar-lines . 1) (tool-bar-lines . 0))))
+
   ;;
   ;; Modifier Keys
   ;;

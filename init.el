@@ -25,10 +25,9 @@
     (load-file envir)))  
 
 ;; start in the shell
-(shell)
-
-;; use *unix* as the buffer name for easier completion
-(my-aif (get-buffer "*shell*")
-    (with-current-buffer it (rename-buffer "*unix*")))
-
-
+;;   use *unix* as the buffer name, rather than *shell*,
+;;   to avoid completion conflicts with "*Shell Command Output*"
+(let* ((shell-buf (generate-new-buffer-name "*unix*")))
+  (shell shell-buf)
+  (with-selected-window (get-buffer-window shell-buf)
+    (delete-other-windows)))

@@ -4,13 +4,13 @@
 ;;                                                                    ;;
 ;; Emacs Initialization                                               ;;
 ;;                                                                    ;;
-;; Version:    2.5.4                                                  ;;
+;; Version:    2.5.5                                                  ;;
 ;; Author:     Christopher R. Genovese                                ;;
 ;; Maintainer: Christopher R. Genovese                                ;;
 ;;                                                                    ;;
-;; Last Updated: 2010 Dec 18 Sat 23:40                                ;;
+;; Last Updated: 2010 Dec 22 Wed 22:55                                ;;
 ;; By:           Christopher R. Genovese                              ;;
-;; Update #:     258                                                  ;;
+;; Update #:     260                                                  ;;
 ;;                                                                    ;;
 ;; Copyright (C) 2010, Christopher R. Genovese, all rights reserved.  ;;                    
 ;;                                                                    ;;
@@ -129,7 +129,10 @@
 ;; version, I am likely to transition to a two name space with slash
 ;; formulation, using pvt-crg/ and crg/  in place of my-, using my-
 ;; only for configuration variables for which that makes the most sense.
-;; I am still considering this, however.
+;; I am still considering this, however. Note also that for some
+;; hook functions, where I add lines with some frequency,
+;; I leave the closing paren on its own line for convenient adding,
+;; contrary to established lisp convention. 
 ;;
 
 
@@ -187,11 +190,11 @@
 ;; wanting to do frequently.
 ;;
 
-(defalias 'filter           'remove-if-not)
+(defalias 'filter           'remove-if-not)  ; NOTE: cl dependence
 (defalias 'foreach          'dolist)
 
 (defalias '==               'equal)
-(defalias '===              'eq)   
+(defalias '===              'eql)   
 (defalias 'num-equal        '=)   ; goes with 'string-equal
 (defalias 'num-not-equal    '/=) 
 
@@ -222,10 +225,17 @@
 (defalias 'whole-number?    'wholenump)
 (defalias 'window-alive?    'window-live-p)
 
+(defalias 'file-is-directory?            'file-directory-p)
+(defalias 'file-is-symlink?              'file-symlink-p)
+(defalias 'file-is-accessible-directory? 'file-accessible-directory-p)
+
 (dolist
     (sym '(arrayp atom bobp bolp booleanp boundp bound-and-true-p 
 		  bufferp buffer-modified-p char-or-string-p char-table-p
-		  commandp consp fboundp floatp framep functionp
+		  commandp consp fboundp file-executable-p 
+                  file-exists-p file-locked-p file-name-absolute-p
+                  file-newer-than-file-p file-readable-p file-regular-p
+                  file-writeable-p floatp framep functionp
 		  integer-or-marker-p integerp keymapp keywordp
 		  listp markerp nlistp number-or-marker-p numberp
 		  overlayp processp sequencep stringp string-lessp
@@ -354,8 +364,10 @@ During evaluation of body, bind `it' to the value returned by TEST."
 ;; Operations on file and directory (and other) names
 ;; 
 ;; Functions defined here:
-;; `expand-directory-name', `directory-name-and-sep', `equal-file-name',
-;; `equal-dir-name', `remove-prefix'
+;; `expand-directory-name', `directory-name-and-sep',
+;; `file-path-name', `directory-path-name',
+;; `equal-file-name', `equal-dir-name',
+;; `remove-prefix'
 ;; 
 
 (defun expand-directory-name (dir)
@@ -364,19 +376,31 @@ that the name ends with a '/'.  This can be used to convert
 a directory name, even in relative or ~ form, to a canonical
 form, for comparison, concatenation, or other purposes."
   (file-name-as-directory (expand-file-name dir)))
-; working but probably obsolete>:
-;  (save-excursion
-;    (let ((dir (and (stringp dir) (expand-file-name dir))))
-;      (if (and dir (not (string-match "/$" dir)))
-;	  (concat dir "/")
-;	dir))) )
 
-(defun directory-name-and-sep (dir)
-  "If directory name does not end in '/', append it to DIR
-and return the new name; otherwise return DIR itself. No
-other expansion is done; but see `expand-directory-name'."
-  (or (and dir (not (string-match "/$" dir)) (concat dir "/"))
-      dir))
+(defalias 'directory-name-with-sep    'file-name-as-directory)
+(defalias 'directory-name-without-sep 'directory-file-name)
+
+(defun file-path-name (&rest path-components)
+  "Return unexpanded path to *file* with path components given by
+the list of strings PATH-COMPONENTS. Leading with an empty string
+produces a path to a file from the current directory; leading
+with the directory-separator character produces an absolute path.
+The last component of the assumed path is treated as a file, so
+no directory separator is appended; to get a path with an ending
+separator, see `directory-path-name'."
+  (directory-name-without-sep
+   (mapconcat 'file-name-as-directory path-components "")))
+
+(defun directory-path-name (&rest path-components)
+  "Return unexpanded path to *directory* with path components given
+by the list of strings PATH-COMPONENTS. Leading with an empty
+string produces a path to a directory from the current directory;
+leading with the directory-separator character produces an
+absolute path. The returned path is treated as a directory,
+with directory separator appended; to get a path without an
+ending separator,  see `file-path-name'."
+  (mapconcat 'directory-name-with-sep path-components ""))
+
 
 (defun equal-file-name (fn1 fn2 &optional func)
   "Tests whether two file-names FN1 and FN2 refer to the same file.
@@ -1047,12 +1071,22 @@ or not a directory name should be changed to \"~/\".")
 ;;; Org Mode
 
 (defun my-org-load-hook ()
-  (setq org-startup-folded nil)
+  (setq org-startup-folded 'content) ; nil also good
+  (setq org-cycle-separator-lines 2)
+  (setq org-log-into-drawer t)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
      (R . t)
      (ditaa . t)))
+  (setq org-todo-keywords
+        '((sequence "TODO" "WAIT" "DONE")))
+  (setq org-agenda-custom-commands '(("A" "Agenda for two week span" agenda ""
+                                      ((org-agenda-span 14) (org-agenda-start-day "-1mon")))))
+  (setq org-tags-column -80)
+  (copy-face 'org-todo 'org-wait-face) ; bug with string when doing org-write-agenda
+  (set-face-foreground 'org-wait-face "lightgoldenrod2")
+  (setq org-todo-keyword-faces '(("WAIT" . org-wait-face))) 
   )
 
 (defun my-org-mode-hook ()
@@ -1060,6 +1094,8 @@ or not a directory name should be changed to \"~/\".")
   (local-set-key "\C-c\C-x\M-c" 'org-copy-special)
   (local-set-key "\C-c\M-c"     'org-edit-src-code) ; see which I like best
   (local-set-key "\C-c\M-s"     'org-edit-src-code) ; C-c ' taken by icicles
+  (local-set-key [\C-\M-return] 'org-insert-subheading)
+  (local-set-key [\C-\M-\S-return] 'org-insert-todo-subheading)
   )
 
 (add-hook 'org-load-hook 'my-org-load-hook)
@@ -1067,7 +1103,7 @@ or not a directory name should be changed to \"~/\".")
 (add-hook 'org-mode-hook 'my-org-mode-hook)
 
 ;(setq org-todo-keywords
-;      '((sequence "TODO(t)" "WAIT(w@/!)" "DONE(d)")
+;      '((sequence "TODO(t)" "WAIT(w@)" "DONE(d)")
 ;        (sequence "READING" "REVIEWING" "RESPONDED")
 ;        (sequence "PREPARED" "DISPATCHED" "PROCESSED" "FINISHED")
 ;        (sequence "FOUND" "TESTING" "FIXING" "FIXED")))
@@ -2952,6 +2988,8 @@ functions, which use zero-indexing for POSITION."
         my-help-events))
      (lookup-key icicle-mode-map "\C-h"))
     (define-key icicle-mode-map "\C-h" nil))
+  (when icicle-mode
+    (define-key icicle-mode-map "\C-c/" nil)) ; conflicts with org-sparse-tree in org-mode
   (if icicle-mode
       (add-hook 'completion-setup-hook 'my-icicle-show-sort-order t)
     (remove-hook 'completion-setup-hook 'my-icicle-show-sort-order))
@@ -3214,10 +3252,11 @@ as constructed by `my-help-make-override-map'."
     ("d"        . apropos-documentation)
     ("e"        . view-echo-area-messages)
     ("f"        . describe-function)
-    ("F"        . Info-goto-emacs-command-node)
+    ("F"        . view-emacs-FAQ)
     ("g"        . my-help-return-from-help)
     ("G"        . describe-gnu-project)
     ("i"        . info)
+    ("I"        . Info-goto-emacs-command-node)
     ("k"        . describe-key)
     ("K"        . Info-goto-emacs-key-command-node)
     ("l"        . help-go-back)   ; like Info-mode, muscle memory
@@ -3307,7 +3346,6 @@ and so undoes any attempt to adjust the map in the help-mode-hook."
 ;;(@* "TeX-related Modes")                                   ;;;;;;
 ;;                                                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -3427,6 +3465,80 @@ AucTeX modes. Only performed once across all modes."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;; Calendar Mode
+
+(unless (featurep 'astronomy)
+  (require-soft 'astronomy))
+
+(when (featurep 'astronomy)
+  (defun astronomy-twilight-time-to-time-string (time-list)
+    "Converts a twilight time list as returned by
+`solar-astronomical-twilight' from astronomy.el into a time
+string. TIME-LIST is of the form (TIME ZONE) where TIME is a
+decimal time and ZONE is a string, e.g., EST. The result is
+converted into an hh:mm ZONE string. Treats the boundary case of
+a time within 30 seconds of midnight by saying \"midnight\"."
+    (let* ((hour (floor (car time-list)))
+           (min (round (* 60.0 (- (car time-list) hour))))
+           (zone (cadr time-list)))
+      (format "%s %s"
+              (if (and (= min 60) (= hour 23))
+                  "midnight"
+                (format "%02d:%02d" hour min))
+              zone)))
+
+  (defun calendar-astronomical-twilight (&optional event)
+    "Local time of astronomical twilight, morning and evening,
+for date under cursor. Accurate to a few seconds."
+    (interactive (list last-nonmenu-event))
+    (or (and calendar-latitude calendar-longitude calendar-time-zone)
+        (solar-setup))
+    (let* ((date (calendar-cursor-to-date t event))
+           (twilight (solar-astronomical-twilight date))
+           (morning (car twilight))
+           (evening (cadr twilight)))
+      (message "Astronomical twilight on %s: %s (morning) and %s (evening)"
+               (calendar-date-string date t t)
+               (astronomy-twilight-time-to-time-string morning)
+               (astronomy-twilight-time-to-time-string evening)))))
+
+(defun my-calendar-mode-hook ()
+  (local-set-key "\C-w"    'calendar-scroll-right-three-months)
+  (local-set-key "\M-p"    'calendar-backward-month)
+  (local-set-key "\M-n"    'calendar-forward-month)
+  (local-set-key "\M-w"    'calendar-beginning-of-year)
+  (local-set-key "\M-v"    'calendar-end-of-year)
+  (local-set-key "\C-\M-p" 'calendar-backward-year)
+  (local-set-key "\C-\M-n" 'calendar-forward-year)
+  (local-set-key "L"       'lunar-phases)
+  (when (featurep 'astronomy)
+    (local-set-key "T" 'calendar-astronomical-twilight))
+  )
+
+(add-hook 'calendar-mode-hook 'my-calendar-mode-hook)
+
+(setq calendar-date-display-form
+     '((when dayname (concat (substring dayname 0 3) " "))
+       (format "%02d" (string-to-number day)) " " (substring monthname 0 3) " " year))
+
+(add-hook 'calendar-today-visible-hook 'calendar-mark-today)
+
+(setq calendar-week-start-day 1)  ; Start week on monday
+
+(setq calendar-font-lock-keywords ; Change how weekends are highlighted 
+      (subst 'font-lock-keyword-face 'font-lock-comment-face calendar-font-lock-keywords))
+
+; (setq calendar-font-lock-keywords
+;       (mapcar (lambda (seq)
+;                 (let
+;                     ((sub (substitute 'font-lock-keyword-face
+;                                       'font-lock-comment-face
+;                                       (list (car seq) (cdr seq)))))
+;                   (cons (car sub) (cadr sub))))
+;               calendar-font-lock-keywords)) ; Change how weekends are highlighted 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;; Formats
 
 (defvar my-date-format "%Y %b %d %a"
@@ -3506,7 +3618,8 @@ Should always be defined as NIL initially.")
        (eq qualifier (with-current-buffer buf major-mode))))
     (setq ibuffer-saved-filter-groups
           `(("default"
-             ,@(ibuffer-match-my-files "Teaching" "class/" "^s")
+             ,@(when (file-directory-p (concat my-home-dir "class"))
+                 (ibuffer-match-my-files "Teaching" "class/" "^s"))
              ("Documents" (or (mode . plain-tex-mode)
                               (mode . latex-mode)
                               (mode . bibtex-mode)
@@ -3514,23 +3627,35 @@ Should always be defined as NIL initially.")
                               (mode-nostar . org-mode)
                               (mode-nostar . fundamental-mode)
                               (mode . nxml-mode)
-                              (mode . nxhtml-mode)))
-             ,@(ibuffer-match-my-files "Android" "Documents/" "^Eclipse")
-             ,@(ibuffer-match-my-files "Arduino" "Programming/" "^Arduino")
-             ("Code" (or (mode . cc-mode)
+                              (mode . nxhtml-mode)
+                              (mode . css-mode)))
+             ,@(when (file-directory-p (concat my-home-dir "Documents"))
+                 (ibuffer-match-my-files "Android" "Documents/" "^Eclipse"))
+             ,@(when (file-directory-p (concat my-home-dir "Programming"))
+                 (ibuffer-match-my-files "Arduino" "Programming/" "^Arduino"))
+             ("Code" (or (mode . c-mode)
                          (mode . python-mode)
                          (mode . java-mode)
                          (mode . ess-mode)
-                         (mode . js2-mode)
                          (mode . ruby-mode)
+                         (mode . clojure-mode)
+                         (mode . lisp-mode)
+                         (mode . js2-mode)
                          (mode . haskell-mode)
                          (mode . perl-mode)
+                         (mode . cperl-mode)
                          (mode . tuareg-mode)
+                         (mode . c++-mode)
+                         (mode . sh-mode)
+                         (mode . php-mode)
+                         (mode . objc-mode)
+                         (mode . processing-mode)
+                         (mode . arduino-mode)
+                         (mode . ps-mode)
                          (mode . R-mode)
                          (mode . r-mode)
                          (mode . R-transcript-mode)
                          (mode . r-transcript-mode)
-                         (mode . sh-mode)
                          (filename . "[Mm]akefile")))
              ("Emacs" (mode-nostar . emacs-lisp-mode))
              ("Shells" (or (mode . shell-mode)
@@ -3847,7 +3972,9 @@ otherwise it is transformed to at. The default")
 (when (featurep 'org-install)
   (define-key my-org-map "a" 'org-agenda)
   (define-key my-org-map "c" 'org-capture)
-  (define-key my-org-map "l" 'org-store-link))
+  (define-key my-org-map "l" 'org-store-link)
+  (define-key my-org-map "A" 'org-attach)
+  (define-key my-org-map "3" 'calendar))
 
 (when (featurep 'icicles)
   (define-key my-org-map [escape] (make-sparse-keymap)) ; to allow icicle-complete-keys
@@ -3863,8 +3990,9 @@ otherwise it is transformed to at. The default")
   (define-key my-icicles-map "g" 'icicle-search-generic)
   (define-key my-icicles-map "o" 'icicle-occur)
   (define-key my-icicles-map "m" 'icicle-search-bookmark)
+  (define-key my-icicles-map "M" 'icicle-search-bookmarks-together)
   (define-key my-icicles-map "s" 'icicle-search)
-  (define-key my-icicles-map "t" 'icicle-search-bookmarks-together)
+  (define-key my-icicles-map "t" 'icicle-complete-thesaurus-entry) ; from "\C-c/" 
   (define-key my-icicles-map "$" 'icicle-search-word)
   (define-key my-icicles-map "^" 'icicle-search-keywords)
   (define-key my-icicles-map "`" 'icicle-compilation-search)
@@ -3873,7 +4001,6 @@ otherwise it is transformed to at. The default")
   (define-key my-icicles-map [tab] 'icicle-comint-command)
   (define-key my-icicles-map [escape] (make-sparse-keymap)) ; to allow icicle-complete-keys
   (add-to-list 'icicle-keymaps-for-key-completion 'my-icicles-map t))
-
 
     ;; Anything
 
@@ -3954,6 +4081,12 @@ otherwise it is transformed to at. The default")
   ;;
     (define-key help-map "\C-c"   'describe-key-briefly)
     (define-key help-map "\M-c"   'describe-copying)
+    (define-key help-map "\C-f"   'describe-face)
+    (define-key help-map "F"      'view-emacs-FAQ)
+    (define-key help-map "\C-i"   'Info-goto-emacs-command-node) ; might be easier in practice
+    (define-key help-map "I"      'Info-goto-emacs-command-node) ; for help-mode consistency
+    (define-key help-map "\M-i"   'describe-input-method)        ; not often needed
+    (define-key help-map "T"      'describe-text-properties) 
     (dolist (event my-help-events)
       (global-set-key event 'help-command)) 
   ;;
@@ -4071,8 +4204,8 @@ otherwise it is transformed to at. The default")
     (define-key ctl-x-map "%"  'my-string-replace-prefix)
     (define-key ctl-x-map "m"  'my-mark-prefix)
     (define-key ctl-x-map "a"  'my-abbrev-prefix)
+    (global-set-key [?\M-T]    'my-transpose-prefix)
     (global-set-key [?\A-t]    'my-transpose-prefix)
-    (global-set-key [?\S-\M-t] 'my-transpose-prefix)
   ;;
   ;; Modified Arrow Keys get added functionality
   ;;
@@ -4178,7 +4311,7 @@ on and off afterwards."
     ((equal sym 'ido)
      (ido-mode '1)
      (setq ido-case-fold t))
-    ((equal sym 'iswitchb) ;;; Use smart buffer switching
+    ((equal sym 'iswitchb) ; Use smart buffer switching
      (iswitchb-mode '1)                      
      (setq iswitchb-case t))))
     
@@ -4189,36 +4322,38 @@ on and off afterwards."
   (setq-default next-line-add-newlines nil)
     
   (setq-default fill-column '72)
-  (setq paragraph-start paragraph-separate)            ;;; Use blank lines to separate paragraphs by default
-  (setq adaptive-fill-regexp "[ \t]*\\([>*%#]+ +\\)?") ;;; Fill around comment beginnings and yanked-messages
-  (setq sentence-end-double-space nil)                 ;;; Allow frenchspacing
-  (setq page-delimiter "^\\(\f\\|\n\n+\\)")            ;;; FF or 2+ consecutive blank lines
+  (setq paragraph-start paragraph-separate)            ; Use blank lines to separate paragraphs by default
+  (setq adaptive-fill-regexp "[ \t]*\\([>*%#]+ +\\)?") ; Fill around comment beginnings and yanked-messages
+  (setq sentence-end-double-space nil)                 ; Allow frenchspacing
+  (setq page-delimiter "^\\(\f\\|\n\n+\\)")            ; FF or 2+ consecutive blank lines
 
   (setq history-length 256)
-  (setq print-length 1024)                 ;;; Give more information in help
+  (setq print-length 1024)                 ; Give more information about objects in help
   (setq print-level  8)
+  (setq eval-expression-print-length 1024) ; ...and in *elisp*
+  (setq eval-expression-print-level  8)
 
   (if (>= emacs-major-version 23)
       (setq-default major-mode 'org-mode)
-    (setq default-major-mode 'org-mode))   ;; back to fundamental-mode if org-mode causes strange behavior??
-  (setq my-keep-scratch-buf "*elisp*")     ;; if nil, delete; if string, new name; otherwise leave alone.
+    (setq default-major-mode 'org-mode))   ; back to fundamental-mode if org-mode causes strange behavior??
+  (setq my-keep-scratch-buf "*elisp*")     ; if nil, delete; if string, new name; otherwise leave alone.
   
   (setq display-time-24hr-format t)
-  (display-time)                           ;;; Time on Mode Line
+  (display-time)                           ; Time on Mode Line
     
-  (transient-mark-mode '1)                 ;;; Highlight region
-  (setq kill-read-only-ok t)               ;;; OK to use kill to copy text in read-only buffer
+  (transient-mark-mode '1)                 ; Highlight region
+  (setq kill-read-only-ok t)               ; OK to use kill to copy text in read-only buffer
   (if (fboundp 'menu-bar-mode)
-      (menu-bar-mode  1))                  ;;; Make menu bar available, just in case
+      (menu-bar-mode  1))                  ; Make menu bar available, just in case
   (if (fboundp 'tool-bar-mode)
-      (tool-bar-mode  -1))                 ;;; Disable tool bar
-  (setq-default scroll-bar-mode 'right)    ;;; Put scroll bars on the right
-  (toggle-scroll-bar  '1)                  ;;; Use scroll bars (mostly for visual sense of buffer size)
-  (auto-compression-mode '1)               ;;; Auto view compressed files
-  (turn-on-global-show-paren-mode)         ;;; show matching parens
-  (setq indicate-empty-lines t)            ;;; show empty lines at end of file
+      (tool-bar-mode  -1))                 ; Disable tool bar
+  (setq-default scroll-bar-mode 'right)    ; Put scroll bars on the right
+  (toggle-scroll-bar  '1)                  ; Use scroll bars (mostly for visual sense of buffer size)
+  (auto-compression-mode '1)               ; Auto view compressed files
+  (turn-on-global-show-paren-mode)         ; show matching parens
+  (setq indicate-empty-lines t)            ; show empty lines at end of file
 
-  (setq browse-url-browser-function 'browse-url-firefox) ;; use new tabs in firefox
+  (setq browse-url-browser-function 'browse-url-firefox) ; use new tabs in firefox
   (setq browse-url-firefox-new-window-is-tab t)
   (setq browse-url-new-window-flag  t)
 
@@ -4234,6 +4369,25 @@ on and off afterwards."
 ;;                                                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defconst my-platform
+  (cond ((or (string-equal system-type "darwin")
+             (eq window-system 'ns)
+             (eq window-system 'mac))
+	 'macosx)
+	((or (string-equal system-type "ms-dos")
+             (string-equal system-type "windows-nt")
+	     (string-equal system-type "cygwin"))
+	 'windows)
+        (t
+         'linux))
+  "The platform on which we are currently running, derived from
+the variables `system-type' and `window-system'. Value is a
+symbol. For the moment, all *nix variants are converted to
+`linux', though this can be generalized later if needed")
+
+;; ATTN This is a bit of a mess below.
+;; Put the settings in their own functions or settings
+;; and use my-platform
 
 ;; Operating-system-specific settings
 
@@ -4287,10 +4441,18 @@ on and off afterwards."
 ;; Mac OSX Specific Settings (see ~/.emacs.d/my-env.el for more)
 
 (when (or (eq window-system 'ns)   ; Gnu Emacs 23+ (Cocoa/NextStep)
-          (eq window-system 'mac)) ; Carbon Emacs 22
-  (if (eq window-system 'mac)
-      (message "MAC CARBON SYSTEM CHECK")
-    (message "MAC COCOA SYSTEM CHECK")) ; checking if this is sufficient
+          (eq window-system 'mac)  ; Carbon Emacs 22
+          (string-equal system-type "darwin"))
+  (when window-system
+    (if (eq window-system 'mac)
+        (message "MAC CARBON SYSTEM CHECK")
+      (message "MAC COCOA SYSTEM CHECK"))
+    (setq default-frame-alist           ; new frames after initial one
+          '((top . 48) (left . 24)   
+            (width . 180) (height . 56)
+            (cursor-color . "gray40")
+            (menu-bar-lines . 1) (tool-bar-lines . 0))))
+
   ;;
   ;; Modifier Keys
   ;;
@@ -4347,12 +4509,15 @@ on and off afterwards."
 ;;                                                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(if window-system
+(when window-system
     (progn
       (set-face-background 'region "lightgoldenrod2")  
       (set-face-background 'secondary-selection "gray")
-      )
-  )
+      ;(when (facep 'calendar-today-face)
+      ;    (set-face-foreground 'calendary-today-face "firebrick")
+      ;    (set-face-bold-p 'calendar-today-face t)
+      ;    (set-face-underline-p 'calendar-today-face nil))
+      ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                                           ;;
@@ -4381,10 +4546,9 @@ on and off afterwards."
     (load-file envir)))  
 
 ;; start in the shell
-(shell)
-
-;; use *unix* as the buffer name for easier completion
-(my-aif (get-buffer "*shell*")
-    (with-current-buffer it (rename-buffer "*unix*")))
-
-
+;;   use *unix* as the buffer name, rather than *shell*,
+;;   to avoid completion conflicts with "*Shell Command Output*"
+(let* ((shell-buf (generate-new-buffer-name "*unix*")))
+  (shell shell-buf)
+  (with-selected-window (get-buffer-window shell-buf)
+    (delete-other-windows)))

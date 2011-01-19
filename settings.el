@@ -69,7 +69,7 @@ on and off afterwards."
     ((equal sym 'ido)
      (ido-mode '1)
      (setq ido-case-fold t))
-    ((equal sym 'iswitchb) ;;; Use smart buffer switching
+    ((equal sym 'iswitchb) ; Use smart buffer switching
      (iswitchb-mode '1)                      
      (setq iswitchb-case t))))
     
@@ -80,36 +80,38 @@ on and off afterwards."
   (setq-default next-line-add-newlines nil)
     
   (setq-default fill-column '72)
-  (setq paragraph-start paragraph-separate)            ;;; Use blank lines to separate paragraphs by default
-  (setq adaptive-fill-regexp "[ \t]*\\([>*%#]+ +\\)?") ;;; Fill around comment beginnings and yanked-messages
-  (setq sentence-end-double-space nil)                 ;;; Allow frenchspacing
-  (setq page-delimiter "^\\(\f\\|\n\n+\\)")            ;;; FF or 2+ consecutive blank lines
+  (setq paragraph-start paragraph-separate)            ; Use blank lines to separate paragraphs by default
+  (setq adaptive-fill-regexp "[ \t]*\\([>*%#]+ +\\)?") ; Fill around comment beginnings and yanked-messages
+  (setq sentence-end-double-space nil)                 ; Allow frenchspacing
+  (setq page-delimiter "^\\(\f\\|\n\n+\\)")            ; FF or 2+ consecutive blank lines
 
   (setq history-length 256)
-  (setq print-length 1024)                 ;;; Give more information in help
+  (setq print-length 1024)                 ; Give more information about objects in help
   (setq print-level  8)
+  (setq eval-expression-print-length 1024) ; ...and in *elisp*
+  (setq eval-expression-print-level  8)
 
   (if (>= emacs-major-version 23)
       (setq-default major-mode 'org-mode)
-    (setq default-major-mode 'org-mode))   ;; back to fundamental-mode if org-mode causes strange behavior??
-  (setq my-keep-scratch-buf "*elisp*")     ;; if nil, delete; if string, new name; otherwise leave alone.
+    (setq default-major-mode 'org-mode))   ; back to fundamental-mode if org-mode causes strange behavior??
+  (setq my-keep-scratch-buf "*elisp*")     ; if nil, delete; if string, new name; otherwise leave alone.
   
   (setq display-time-24hr-format t)
-  (display-time)                           ;;; Time on Mode Line
+  (display-time)                           ; Time on Mode Line
     
-  (transient-mark-mode '1)                 ;;; Highlight region
-  (setq kill-read-only-ok t)               ;;; OK to use kill to copy text in read-only buffer
+  (transient-mark-mode '1)                 ; Highlight region
+  (setq kill-read-only-ok t)               ; OK to use kill to copy text in read-only buffer
   (if (fboundp 'menu-bar-mode)
-      (menu-bar-mode  1))                  ;;; Make menu bar available, just in case
+      (menu-bar-mode  1))                  ; Make menu bar available, just in case
   (if (fboundp 'tool-bar-mode)
-      (tool-bar-mode  -1))                 ;;; Disable tool bar
-  (setq-default scroll-bar-mode 'right)    ;;; Put scroll bars on the right
-  (toggle-scroll-bar  '1)                  ;;; Use scroll bars (mostly for visual sense of buffer size)
-  (auto-compression-mode '1)               ;;; Auto view compressed files
-  (turn-on-global-show-paren-mode)         ;;; show matching parens
-  (setq indicate-empty-lines t)            ;;; show empty lines at end of file
+      (tool-bar-mode  -1))                 ; Disable tool bar
+  (setq-default scroll-bar-mode 'right)    ; Put scroll bars on the right
+  (toggle-scroll-bar  '1)                  ; Use scroll bars (mostly for visual sense of buffer size)
+  (auto-compression-mode '1)               ; Auto view compressed files
+  (turn-on-global-show-paren-mode)         ; show matching parens
+  (setq indicate-empty-lines t)            ; show empty lines at end of file
 
-  (setq browse-url-browser-function 'browse-url-firefox) ;; use new tabs in firefox
+  (setq browse-url-browser-function 'browse-url-firefox) ; use new tabs in firefox
   (setq browse-url-firefox-new-window-is-tab t)
   (setq browse-url-new-window-flag  t)
 

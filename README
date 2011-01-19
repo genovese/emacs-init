@@ -4,9 +4,9 @@
 
   What:         Emacs Initialization File (and Builder)
   Author:       Christopher Genovese
-  Version:      2.5.4
-  Update #:     258
-  Last Updated: Sun 19 Dec 2010
+  Version:      2.5.5
+  Update #:     260
+  Last Updated: Wed 22 Dec 2010
   Tested with:  Emacs 23.2.1, 22.2  (Mac OS X 10.5.8)
 
 
@@ -15,14 +15,15 @@
   This emacs initialization has grown over years of use, tweaking, and
   experimentation. Nonetheless, I've worked to maintain a useful
   organization that will make modification and sharing easier. Although
-  it is a truism that everyone loves their own customizations, I do
-  believe there are features here that are generally useful, and I hope
-  that others give this init file a try, in part or in whole.
+  it is a truism that everyone loves their own customizations, it's
+  my hope (belief) there are features here that are generally useful,
+  and I hope that others can benefit from this init file, in part
+  or in whole.
 
   The following are some of the notable features. These are mostly small
   things, but I want to highlight them because they might be hard to
-  spot in all this. Detailed documentation for the features is given in
-  the component files, linked to below.
+  spot in all this code. Detailed documentation for the features is
+  given in the component files, linked to below.
   
 
     + Efficient Key Bindings
@@ -126,11 +127,15 @@
     + SLIME
 
       Superior Lisp Interaction Mode for Emacs (SLIME) is a nice
-      way to deal with various lisp dialects. It works with
-      clojure as well, but the invocation sequence appears to be
-      different. I give an alternative interface that lets one
+      way to deal with various lisp dialects. Although there
+      is a swank support through lein that does work with SLIME,
+      it forces one to invoke swank externally and then connect
+      using a different mechanism (slime-connect) than with other
+      dialects. Here, I give an alternative interface that lets one
       add and modify lisp implemenations in a variety of ways,
       unifying starting and stopping across implementations.
+      Clojure works directly this way, automatically connecting
+      to swank from within emacs.
 
       See file [[file:prog-modes.el][prog-modes.el]] for details.
 

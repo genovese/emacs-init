@@ -139,7 +139,9 @@
 (when (featurep 'org-install)
   (define-key my-org-map "a" 'org-agenda)
   (define-key my-org-map "c" 'org-capture)
-  (define-key my-org-map "l" 'org-store-link))
+  (define-key my-org-map "l" 'org-store-link)
+  (define-key my-org-map "A" 'org-attach)
+  (define-key my-org-map "3" 'calendar))
 
 (when (featurep 'icicles)
   (define-key my-org-map [escape] (make-sparse-keymap)) ; to allow icicle-complete-keys
@@ -155,8 +157,9 @@
   (define-key my-icicles-map "g" 'icicle-search-generic)
   (define-key my-icicles-map "o" 'icicle-occur)
   (define-key my-icicles-map "m" 'icicle-search-bookmark)
+  (define-key my-icicles-map "M" 'icicle-search-bookmarks-together)
   (define-key my-icicles-map "s" 'icicle-search)
-  (define-key my-icicles-map "t" 'icicle-search-bookmarks-together)
+  (define-key my-icicles-map "t" 'icicle-complete-thesaurus-entry) ; from "\C-c/" 
   (define-key my-icicles-map "$" 'icicle-search-word)
   (define-key my-icicles-map "^" 'icicle-search-keywords)
   (define-key my-icicles-map "`" 'icicle-compilation-search)
@@ -165,7 +168,6 @@
   (define-key my-icicles-map [tab] 'icicle-comint-command)
   (define-key my-icicles-map [escape] (make-sparse-keymap)) ; to allow icicle-complete-keys
   (add-to-list 'icicle-keymaps-for-key-completion 'my-icicles-map t))
-
 
     ;; Anything
 
@@ -246,6 +248,12 @@
   ;;
     (define-key help-map "\C-c"   'describe-key-briefly)
     (define-key help-map "\M-c"   'describe-copying)
+    (define-key help-map "\C-f"   'describe-face)
+    (define-key help-map "F"      'view-emacs-FAQ)
+    (define-key help-map "\C-i"   'Info-goto-emacs-command-node) ; might be easier in practice
+    (define-key help-map "I"      'Info-goto-emacs-command-node) ; for help-mode consistency
+    (define-key help-map "\M-i"   'describe-input-method)        ; not often needed
+    (define-key help-map "T"      'describe-text-properties) 
     (dolist (event my-help-events)
       (global-set-key event 'help-command)) 
   ;;
@@ -363,8 +371,8 @@
     (define-key ctl-x-map "%"  'my-string-replace-prefix)
     (define-key ctl-x-map "m"  'my-mark-prefix)
     (define-key ctl-x-map "a"  'my-abbrev-prefix)
+    (global-set-key [?\M-T]    'my-transpose-prefix)
     (global-set-key [?\A-t]    'my-transpose-prefix)
-    (global-set-key [?\S-\M-t] 'my-transpose-prefix)
   ;;
   ;; Modified Arrow Keys get added functionality
   ;;

@@ -839,6 +839,8 @@ functions, which use zero-indexing for POSITION."
         my-help-events))
      (lookup-key icicle-mode-map "\C-h"))
     (define-key icicle-mode-map "\C-h" nil))
+  (when icicle-mode
+    (define-key icicle-mode-map "\C-c/" nil)) ; conflicts with org-sparse-tree in org-mode
   (if icicle-mode
       (add-hook 'completion-setup-hook 'my-icicle-show-sort-order t)
     (remove-hook 'completion-setup-hook 'my-icicle-show-sort-order))
@@ -1101,10 +1103,11 @@ as constructed by `my-help-make-override-map'."
     ("d"        . apropos-documentation)
     ("e"        . view-echo-area-messages)
     ("f"        . describe-function)
-    ("F"        . Info-goto-emacs-command-node)
+    ("F"        . view-emacs-FAQ)
     ("g"        . my-help-return-from-help)
     ("G"        . describe-gnu-project)
     ("i"        . info)
+    ("I"        . Info-goto-emacs-command-node)
     ("k"        . describe-key)
     ("K"        . Info-goto-emacs-key-command-node)
     ("l"        . help-go-back)   ; like Info-mode, muscle memory

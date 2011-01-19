@@ -3,8 +3,10 @@
 ;; Operations on file and directory (and other) names
 ;; 
 ;; Functions defined here:
-;; `expand-directory-name', `directory-name-and-sep', `equal-file-name',
-;; `equal-dir-name', `remove-prefix'
+;; `expand-directory-name', `directory-name-and-sep',
+;; `file-path-name', `directory-path-name',
+;; `equal-file-name', `equal-dir-name',
+;; `remove-prefix'
 ;; 
 
 (defun expand-directory-name (dir)
@@ -13,19 +15,31 @@ that the name ends with a '/'.  This can be used to convert
 a directory name, even in relative or ~ form, to a canonical
 form, for comparison, concatenation, or other purposes."
   (file-name-as-directory (expand-file-name dir)))
-; working but probably obsolete>:
-;  (save-excursion
-;    (let ((dir (and (stringp dir) (expand-file-name dir))))
-;      (if (and dir (not (string-match "/$" dir)))
-;	  (concat dir "/")
-;	dir))) )
 
-(defun directory-name-and-sep (dir)
-  "If directory name does not end in '/', append it to DIR
-and return the new name; otherwise return DIR itself. No
-other expansion is done; but see `expand-directory-name'."
-  (or (and dir (not (string-match "/$" dir)) (concat dir "/"))
-      dir))
+(defalias 'directory-name-with-sep    'file-name-as-directory)
+(defalias 'directory-name-without-sep 'directory-file-name)
+
+(defun file-path-name (&rest path-components)
+  "Return unexpanded path to *file* with path components given by
+the list of strings PATH-COMPONENTS. Leading with an empty string
+produces a path to a file from the current directory; leading
+with the directory-separator character produces an absolute path.
+The last component of the assumed path is treated as a file, so
+no directory separator is appended; to get a path with an ending
+separator, see `directory-path-name'."
+  (directory-name-without-sep
+   (mapconcat 'file-name-as-directory path-components "")))
+
+(defun directory-path-name (&rest path-components)
+  "Return unexpanded path to *directory* with path components given
+by the list of strings PATH-COMPONENTS. Leading with an empty
+string produces a path to a directory from the current directory;
+leading with the directory-separator character produces an
+absolute path. The returned path is treated as a directory,
+with directory separator appended; to get a path without an
+ending separator,  see `file-path-name'."
+  (mapconcat 'directory-name-with-sep path-components ""))
+
 
 (defun equal-file-name (fn1 fn2 &optional func)
   "Tests whether two file-names FN1 and FN2 refer to the same file.
