@@ -166,10 +166,10 @@ symbol. For the moment, all *nix variants are converted to
 ;;; Frames
 
 (setq initial-frame-alist '((top . 1) (left . 1)
-                            (width . 237) (height . 81) ; in Anonymous Pro; 268 x 72 in Andale Mono
+                            (width . 206) (height . 70) ; in Anonymous Pro; 268 x 72 in Andale Mono
                             (cursor-color . "#dfaf8f"))
       default-frame-alist `((top . 32) (left . 16)      ; was 48,24
-                            (width . 180) (height . 64)
+                            (width . 196) (height . 64)
                             (cursor-color . "#dfaf8f")
                             (menu-bar-lines . 1) (tool-bar-lines . 0)))
 
@@ -1066,7 +1066,7 @@ symbol. For the moment, all *nix variants are converted to
 (global-set-key [\C-\M-backspace] 'backward-kill-sexp)
 (global-set-key "\M-c"            'my/kill-ring-save) ;alternate: my/copy-region-as-kill
 (global-set-key "\M-\C-y"         'append-next-kill)
-(global-set-key "\C-z"            'zap-to-char)
+(global-set-key "\C-z"            'zap-up-to-char)
 (global-set-key "\M-z"            'undo)
 (global-set-key "\C-h"            'delete-backward-char) ; Move help command below
 (global-set-key "\M-h"            'backward-kill-word)
@@ -1218,6 +1218,7 @@ symbol. For the moment, all *nix variants are converted to
 (add-my-hook python-mode-hook
   (local-set-key "\M-\C-a"  'beginning-of-python-def-or-class)
   (local-set-key [(control ?\;)] 'comment-indent-new-line))
+(add-hook 'python-mode-hook 'fci-mode t)
 
 (add-hook 'perl-mode-hook 'highlight-attn-words)
 (add-my-hook perl-mode-hook

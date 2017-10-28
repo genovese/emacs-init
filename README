@@ -1,0 +1,48 @@
+#+TITLE: Emacs Initialization
+#+AUTHOR: Christopher R. Genovese
+#+DATE: 28 Oct 2017
+
+* Manifest
+
+  | File or Directory | Description/Notes                                  |
+  | README            | This file                                          |
+  | Extras            | Files to be installed in ~/.emacs.d or ~/          |
+  | Install.sh        | Installation shell script (use --help for details) |
+  | dot-emacs.el      | Main entry point                                   |
+  | crg-macros.el     | Utility macros used in the configuration           |
+  | crg-ops.el        | A few user-level operational functions             |
+  | crg-utils.el      | A small collection of elisp utilities              |
+  | crg-themes.el     | Configuration for my custom themes                 |
+  | data              | Preferences and other user-level data              |
+  | mods              | Mode or tool specific modifications                |
+  | prototypes        | Experimental or pre-packaged code                  |
+
+
+* Installation
+
+  Run the installation script. First invoke with --help to see the
+  options:
+
+  #+begin_src sh
+    sh Install.sh --help
+    sh Install.sh [...options...]
+  #+end_src
+
+  This does the following with TARGET (default ~/.emacs.d) set
+  by the --target option:
+  
+  1. Create directory $TARGET/init if it does not exist
+  2. Recursively copy all files starting with a lower-caser letter
+     from this directory to $TARGET/init
+  3. Copy Extras/home-dot-emacs.el to ~/.emacs.el, transforming it
+     based on the --package option to set the package source.
+     (This can be package, cask, or cask-homebrew)
+  4. If $TARGET/site-lisp does not exist, create it and copy files
+     from this site-lisp directory there.
+  5. If $TARGET/themes does not exist create it and copy files
+     from this themes directory there.
+  7. If --cask is given and cask is installed, move to $TARGET
+     directory temporarily and do cask install.
+
+
+

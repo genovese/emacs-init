@@ -2,3 +2,10 @@
 .*~
 # Ignore scratch file
 .bonz
+# Ignore mac specific junk
+.DS_Store
+# Ignore archives
+/RCS/*,v
+*.tgz
+# Ignore compiled elisp
+*.elc

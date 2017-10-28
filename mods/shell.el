@@ -374,7 +374,6 @@ Returns t if successful."
          (append
           (list " -%-"
                 '(:eval
-                  
                   (let ((cwd (abbreviate-file-name default-directory)))
                     (propertize
                      cwd
