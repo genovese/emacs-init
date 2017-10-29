@@ -1,0 +1,199 @@
+#+TITLE: Emacs Initialization
+#+AUTHOR: Christopher R. Genovese
+#+DATE: 28 Oct 2017
+
+* Overview
+
+  This is my working emacs configuration, currently used for Emacs 25+ but
+  should work for Emacs 24+.
+
+  ATTN: comments on distinctive features  
+
+
+* Manifest
+
+  | File or Directory        | Description/Notes                                                    |
+  |--------------------------+----------------------------------------------------------------------|
+  | dot-emacs.el             | Main entry point                                                     |
+  | crg-macros.el            | Utility macros used in the configuration                             |
+  | crg-ops.el               | A few user-level operational functions                               |
+  | crg-utils.el             | A small collection of elisp utilities                                |
+  | crg-themes.el            | Configuration and utilities for custom themes                        |
+  | data                     | Directory containing preferences and other user-level data           |
+  | mods                     | Directory containing mode- or tool-specific modifications            |
+  | prototypes               | Experimental or pre-packaged code                                    |
+  | Extras                   | Directory with supplementary files to be installed in target or home |
+  | Extras/Install.sh        | Installation shell script (use --help for details)                   |
+  | Extras/Update.sh         | Shell script to update Extras from target when repo stored elsewhere |
+  | Extras/Cask              | Current, though non-minimal, Cask file                               |
+  | Extras/themes            | Current custom themes                                                |
+  | Extras/site-lisp         | Current extra elisp                                                  |
+  | Extras/home-dot-emacs.el | Init file for home directory that loads packages and this code       |
+  | Extras/emacs-custom.el   | My current emacs-custom.el, read during config.                      |
+  | Extras/my-env.el         | My current environment settings, use --with-env to install this      |
+  | README.org               | This file                                                            |
+  |--------------------------+----------------------------------------------------------------------|
+
+
+* Installation
+
+  This code in this repository can be installed directly in your emacss
+  initialization directory or kept separately. There are slightly
+  different steps in the two cases, as described below.
+
+** Clone this repository directly into emacs initialization directory
+
+   This is the usual (and recommended) case. Take the following steps.
+
+   1. Clone this repository into a subdirectory of your
+      emacs initialization directory. 
+
+      #+begin_src sh
+        cd EMACS_D_DIRECTORY
+        git clone https://github.com/genovese/emacs-init.git
+      #+end_src
+
+      Replace =EMACS_D_DIRECTORY= with your emacs initialization
+      directory in the commands above.
+
+   2. Rename =emacs-init= to =init= in this directory.
+
+      #+begin_src sh
+        mv emacs-init init
+      #+end_src
+
+   3. Change to the =init= directory.
+
+      #+begin_src sh
+        cd init
+      #+end_src
+
+   4. Run the install script. There is no need to set the =--target=
+      option as it is =..= by default. The script has a variety of
+      options, but the simplest are
+
+      a. Install code, extras, and packages:
+   
+         #+begin_src sh
+           sh Extras/Install.sh --full
+         #+end_src
+
+         which will install the base code and all extras,
+         including overwriting =../emacs-custom.el= and
+         =.emacs.el= in the home directory. If the 'cask'
+         command is available, this will also use it
+         to install the packages specified in the cask
+         file and will set up emacs to use those packages.
+  
+      b. Install everything but do not overwrite target files:
+   
+         #+begin_src sh
+           sh Extras/Install.sh --full --safe
+         #+end_src
+    
+         which will install the base and extras but will
+         not overwrite the =../Cask=, =../emacs-custom.el=, or
+         =~/.emacs.el= files if they already exist.
+
+      c. Install only the base code:
+   
+         #+begin_src sh
+           sh Extras/Install.sh --minimal
+         #+end_src
+
+      For more details and options, run the script with
+      #+begin_src sh
+        sh Extras/Install.sh --help
+      #+end_src
+
+   5. Edit the file =data/preferences.el= to reflect your
+      personal settings. The most important settings
+      to change are =user-home-page=, =user-email-address=,
+      and =shell=. Simply edit the strings to the right
+      of those keys.
+
+**  Keeping this repository separate from an active emacs init directory
+
+   In some cases, you may want to keep this repository separate
+   from your active emacs initialization directory. The installation
+   is similar to the above.
+
+   1. Clone this repository in a location of your choosing.
+      Move to the the super-directory of choice and do
+
+      #+begin_src sh
+        git clone https://github.com/genovese/emacs-init.git
+      #+end_src
+
+   2. Change to the =emacs-init= directory.
+
+      #+begin_src sh
+        cd emacs-init
+      #+end_src
+
+   3. Run the install script with ~--target~ set to your emacs
+      initialization directory, for instance =~/.emacs.d=. There is a
+      variety of options, but the simplest are
+
+      a. Install code, extras, and packages:
+   
+         #+begin_src sh
+           sh Extras/Install.sh --target=~/.emacs.d --full
+         #+end_src
+
+         which will install the base code and all extras,
+         including overwriting =../emacs-custom.el= and
+         =.emacs.el= in the home directory. If the 'cask'
+         command is available, this will also use it
+         to install the packages specified in the cask
+         file and will set up emacs to use those packages.
+  
+      b. Install everything but do not overwrite target files:
+   
+         #+begin_src sh
+           sh Extras/Install.sh --target=~/.emacs.d --full --safe
+         #+end_src
+    
+         which will install the base and extras but will
+         not overwrite the =../Cask=, =../emacs-custom.el=, or
+         =~/.emacs.el= files if they already exist.
+
+      c. Install only the base code:
+   
+         #+begin_src sh
+           sh Extras/Install.sh --target=~/.emacs. --minimal
+         #+end_src
+
+      For more details and options, run the script with
+      #+begin_src sh
+        sh Extras/Install.sh --help
+      #+end_src
+
+   4. Edit the file =data/preferences.el= to reflect your
+      personal settings. The most important settings
+      to change are =user-home-page=, =user-email-address=,
+      and =shell=. Simply edit the strings to the right
+      of those keys.
+
+** Appendix: Install script overview
+
+   For reference purposes, the =Extras/Install.sh= script roughly does
+   does the following, with TARGET set by the --target option:
+ 
+   1. Create directory $TARGET/init if it does not exist.
+   2. Recursively copy all files starting with a lower-caser letter
+      from this directory to $TARGET/init, unless that is the
+      current directory.
+   3. Copy Extras/home-dot-emacs.el to ~/.emacs.el, transforming it
+      based on the --package and --target options to set the package source.
+      (This can be package, cask, or cask-homebrew)
+   4. If $TARGET/site-lisp does not exist, create it and copy files
+      from this site-lisp directory there.
+   5. If $TARGET/themes does not exist create it and copy files
+      from this themes directory there.
+   7. If --cask is given and cask is installed, move to $TARGET
+      directory temporarily and do cask install.
+
+   
+
+
