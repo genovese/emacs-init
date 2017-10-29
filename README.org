@@ -7,7 +7,13 @@
   This is my working emacs configuration, currently used for Emacs 25+ but
   should work for Emacs 24+.
 
-  ATTN: comments on distinctive features  
+  A few notable features:
+
+  + Non-standard Keybindings: Help
+  + Non-standard Keybindings: Scrolling
+  + Help Navigation
+  + Mode Modifications
+  + Zenburn+ Theme
 
 * Installation
 
