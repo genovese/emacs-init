@@ -9,32 +9,6 @@
 
   ATTN: comments on distinctive features  
 
-
-* Manifest
-
-  | File or Directory        | Description/Notes                                                    |
-  |--------------------------+----------------------------------------------------------------------|
-  | dot-emacs.el             | Main entry point                                                     |
-  | crg-macros.el            | Utility macros used in the configuration                             |
-  | crg-ops.el               | A few user-level operational functions                               |
-  | crg-utils.el             | A small collection of elisp utilities                                |
-  | crg-themes.el            | Configuration and utilities for custom themes                        |
-  | data                     | Directory containing preferences and other user-level data           |
-  | mods                     | Directory containing mode- or tool-specific modifications            |
-  | prototypes               | Experimental or pre-packaged code                                    |
-  | Extras                   | Directory with supplementary files to be installed in target or home |
-  | Extras/Install.sh        | Installation shell script (use --help for details)                   |
-  | Extras/Update.sh         | Shell script to update Extras from target when repo stored elsewhere |
-  | Extras/Cask              | Current, though non-minimal, Cask file                               |
-  | Extras/themes            | Current custom themes                                                |
-  | Extras/site-lisp         | Current extra elisp                                                  |
-  | Extras/home-dot-emacs.el | Init file for home directory that loads packages and this code       |
-  | Extras/emacs-custom.el   | My current emacs-custom.el, read during config.                      |
-  | Extras/my-env.el         | My current environment settings, use --with-env to install this      |
-  | README.org               | This file                                                            |
-  |--------------------------+----------------------------------------------------------------------|
-
-
 * Installation
 
   This code in this repository can be installed directly in your emacss
@@ -52,7 +26,6 @@
         cd EMACS_D_DIRECTORY
         git clone https://github.com/genovese/emacs-init.git
       #+end_src
-
       Replace =EMACS_D_DIRECTORY= with your emacs initialization
       directory in the commands above.
 
@@ -77,7 +50,6 @@
          #+begin_src sh
            sh Extras/Install.sh --full
          #+end_src
-
          which will install the base code and all extras,
          including overwriting =../emacs-custom.el= and
          =.emacs.el= in the home directory. If the 'cask'
@@ -90,7 +62,6 @@
          #+begin_src sh
            sh Extras/Install.sh --full --safe
          #+end_src
-    
          which will install the base and extras but will
          not overwrite the =../Cask=, =../emacs-custom.el=, or
          =~/.emacs.el= files if they already exist.
@@ -140,7 +111,6 @@
          #+begin_src sh
            sh Extras/Install.sh --target=~/.emacs.d --full
          #+end_src
-
          which will install the base code and all extras,
          including overwriting =../emacs-custom.el= and
          =.emacs.el= in the home directory. If the 'cask'
@@ -153,7 +123,6 @@
          #+begin_src sh
            sh Extras/Install.sh --target=~/.emacs.d --full --safe
          #+end_src
-    
          which will install the base and extras but will
          not overwrite the =../Cask=, =../emacs-custom.el=, or
          =~/.emacs.el= files if they already exist.
@@ -180,20 +149,42 @@
    For reference purposes, the =Extras/Install.sh= script roughly does
    does the following, with TARGET set by the --target option:
  
-   1. Create directory $TARGET/init if it does not exist.
+   1. Create directory =$TARGET/init= if it does not exist.
    2. Recursively copy all files starting with a lower-caser letter
-      from this directory to $TARGET/init, unless that is the
+      from this directory to =$TARGET/init=, unless that is the
       current directory.
-   3. Copy Extras/home-dot-emacs.el to ~/.emacs.el, transforming it
-      based on the --package and --target options to set the package source.
-      (This can be package, cask, or cask-homebrew)
-   4. If $TARGET/site-lisp does not exist, create it and copy files
+   3. Copy Extras/home-dot-emacs.el to =~/.emacs.el=, transforming it
+      based on the =--package= and =--target= options to set the package source.
+      (This can be ~package~, ~cask~, or ~cask-homebrew~)
+   4. If =$TARGET/site-lisp= does not exist, create it and copy files
       from this site-lisp directory there.
-   5. If $TARGET/themes does not exist create it and copy files
+   5. If =$TARGET/themes= does not exist create it and copy files
       from this themes directory there.
-   7. If --cask is given and cask is installed, move to $TARGET
+   7. If =--cask= is given and cask is installed, move to $TARGET
       directory temporarily and do cask install.
 
-   
+* File Manifest
+
+  | File or Directory        | Description/Notes                                                    |
+  |--------------------------+----------------------------------------------------------------------|
+  | dot-emacs.el             | Main entry point                                                     |
+  | crg-macros.el            | Utility macros used in the configuration                             |
+  | crg-ops.el               | A few user-level operational functions                               |
+  | crg-utils.el             | A small collection of elisp utilities                                |
+  | crg-themes.el            | Configuration and utilities for custom themes                        |
+  | data                     | Directory containing preferences and other user-level data           |
+  | mods                     | Directory containing mode- or tool-specific modifications            |
+  | prototypes               | Experimental or pre-packaged code                                    |
+  | Extras                   | Directory with supplementary files to be installed in target or home |
+  | Extras/Install.sh        | Installation shell script (use --help for details)                   |
+  | Extras/Update.sh         | Shell script to update Extras from target when repo stored elsewhere |
+  | Extras/Cask              | Current, though non-minimal, Cask file                               |
+  | Extras/themes            | Current custom themes                                                |
+  | Extras/site-lisp         | Current extra elisp                                                  |
+  | Extras/home-dot-emacs.el | Init file for home directory that loads packages and this code       |
+  | Extras/emacs-custom.el   | My current emacs-custom.el, read during config.                      |
+  | Extras/my-env.el         | My current environment settings, use --with-env to install this      |
+  | README.org               | This file                                                            |
+  |--------------------------+----------------------------------------------------------------------|
 
 
