@@ -341,7 +341,8 @@ Returns t if successful."
 
 ;; Configuration
 
-(setq-default shell-file-name "/bin/zsh")
+(setq-default shell-file-name
+              (get-preference 'shell-command "/bin/bash"))
 
 (add-my-hook shell-mode-hook
   "Configure for my standard tcsh handling."           

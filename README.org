@@ -10,10 +10,81 @@
   A few notable features:
 
   + Non-standard Keybindings: Help
-  + Non-standard Keybindings: Scrolling
+
+    Default emacs keybindings reserve =C-h= for help. While
+    help is important and commonly used, it does not
+    need a top-level (control) key. Instead, we do the
+    following:
+
+    - =C-h= -- =delete-backward-char=
+    - =M-h= -- =backward-kill-word=
+    - =C-M-h= -- help
+
+    This is much more efficient than the defaults (no more need for
+    backspace and =backward-kill-word= is very commonly useful). The main
+    complication is that most modes (and to some extend emacs itself,
+    see =help-char=) assume =C-h= for help, which requires additional
+    effort to configure.
+
+  + Non-standard Keybindings: Scrolling and Cutting
+
+    Also in the default keybindings use =C-v= and =M-v= for scrolling up and
+    down. This cuts across levels (control to meta) for a
+    comparable-level operation and is slow, as a result. It also
+    leaves =C-w=, non-mnemonically, for a kill operation. Instead,
+    the keybindings here do the following:
+
+    - =C-w= -- scroll down
+    - =C-v= -- scroll up
+    - =M-w= -- beginning of buffer
+    - =M-v= -- end of buffer
+    - =M-C-w= -- scroll down other window
+    - =M-C-v= -- scroll up other window
+    - =C-k= -- kill line
+    - =M-k= -- kill region
+    - =M-C-k= -- kill sexp
+
+    Again, this requires some remapping in configuring some common
+    modes.
+
   + Help Navigation
+
+    To make the Emacs help system even easier to use, this adds
+    two mechanisms for navigating. First =C-M-h g= from any buffer
+    moves to the help buffer, where =g= moves back to the previous
+    location. Second, =C-M-h= followed by various navigation commands
+    moves the help buffer without changing the active buffer.
+    These commands are as follows:
+
+    - =C-w=   -- scroll down
+    - =C-v=   -- scroll up
+    - =M-w=   -- go to beginning of buffer
+    - =M-v=   -- go to end of buffer
+    - =C-b=   -- back to previous help page
+    - =C-f=   -- forward to next help page
+    - =RET=   -- push button
+    - =TAB=   -- forward-button
+    - =S-TAB= -- backward-button
+    - =q=     -- quit help
+
+  + Server start
+
+    This initialization always starts the emacs-server so
+    you can interact with a running instance using emacsclient.
+
   + Mode Modifications
+
+    The =mods= directory contains mode- or tool-specific modifications
+    and code. This includes improved directory tracking systems
+    for tcsh and zsh (separately), extensions to dired, and some
+    extra tools for AucTeX and Org. Some of the earlier mods have
+    been spun off into their own packages (e.g., =win-switch=)
+    or into existing emacs code (e.g., =ibuffer=).
+
   + Zenburn+ Theme
+
+    A modified zenburn theme, zenburn+, is available
+    in =Extras/themes=.
 
 * Installation
 
@@ -21,75 +92,71 @@
   initialization directory or kept separately. There are slightly
   different steps in the two cases, as described below.
 
-** Clone this repository directly into emacs initialization directory
+** Method 1. Clone this repository directly into emacs initialization directory
 
    This is the usual (and recommended) case. Take the following steps.
 
    1. Clone this repository into a subdirectory of your
-      emacs initialization directory. 
+      emacs initialization directory.
 
       #+begin_src sh
         cd EMACS_D_DIRECTORY
         git clone https://github.com/genovese/emacs-init.git
       #+end_src
+
       Replace =EMACS_D_DIRECTORY= with your emacs initialization
       directory in the commands above.
-
    2. Rename =emacs-init= to =init= in this directory.
 
       #+begin_src sh
         mv emacs-init init
       #+end_src
-
    3. Change to the =init= directory.
 
       #+begin_src sh
         cd init
       #+end_src
-
    4. Run the install script. There is no need to set the =--target=
       option as it is =..= by default. The script has a variety of
       options, but the simplest are
 
       a. Install code, extras, and packages:
-   
+
          #+begin_src sh
            sh Extras/Install.sh --full
          #+end_src
+
          which will install the base code and all extras,
          including overwriting =../emacs-custom.el= and
          =.emacs.el= in the home directory. If the 'cask'
          command is available, this will also use it
          to install the packages specified in the cask
          file and will set up emacs to use those packages.
-  
       b. Install everything but do not overwrite target files:
-   
+
          #+begin_src sh
            sh Extras/Install.sh --full --safe
          #+end_src
+
          which will install the base and extras but will
          not overwrite the =../Cask=, =../emacs-custom.el=, or
          =~/.emacs.el= files if they already exist.
-
       c. Install only the base code:
-   
+
          #+begin_src sh
            sh Extras/Install.sh --minimal
          #+end_src
-
       For more details and options, run the script with
       #+begin_src sh
         sh Extras/Install.sh --help
       #+end_src
-
    5. Edit the file =data/preferences.el= to reflect your
       personal settings. The most important settings
       to change are =user-home-page=, =user-email-address=,
       and =shell=. Simply edit the strings to the right
       of those keys.
 
-**  Keeping this repository separate from an active emacs init directory
+** Method 2. Keeping this repository separate from an active emacs init directory
 
    In some cases, you may want to keep this repository separate
    from your active emacs initialization directory. The installation
@@ -113,7 +180,7 @@
       variety of options, but the simplest are
 
       a. Install code, extras, and packages:
-   
+
          #+begin_src sh
            sh Extras/Install.sh --target=~/.emacs.d --full
          #+end_src
@@ -123,9 +190,9 @@
          command is available, this will also use it
          to install the packages specified in the cask
          file and will set up emacs to use those packages.
-  
+
       b. Install everything but do not overwrite target files:
-   
+
          #+begin_src sh
            sh Extras/Install.sh --target=~/.emacs.d --full --safe
          #+end_src
@@ -134,7 +201,7 @@
          =~/.emacs.el= files if they already exist.
 
       c. Install only the base code:
-   
+
          #+begin_src sh
            sh Extras/Install.sh --target=~/.emacs. --minimal
          #+end_src
@@ -144,17 +211,17 @@
         sh Extras/Install.sh --help
       #+end_src
 
-   4. Edit the file =data/preferences.el= to reflect your
-      personal settings. The most important settings
-      to change are =user-home-page=, =user-email-address=,
-      and =shell=. Simply edit the strings to the right
-      of those keys.
+   4. Edit the file =data/preferences.el= to reflect your personal
+      settings. The most important settings to change are
+      =user-home-page=, =user-email-address=, =shell-command=, and
+      =theme-function=. Simply edit the strings to the right of those
+      keys.
 
 ** Appendix: Install script overview
 
    For reference purposes, the =Extras/Install.sh= script roughly does
    does the following, with TARGET set by the --target option:
- 
+
    1. Create directory =$TARGET/init= if it does not exist.
    2. Recursively copy all files starting with a lower-caser letter
       from this directory to =$TARGET/init=, unless that is the
@@ -192,5 +259,3 @@
   | Extras/my-env.el         | My current environment settings, use --with-env to install this      |
   | README.org               | This file                                                            |
   |--------------------------+----------------------------------------------------------------------|
-
-

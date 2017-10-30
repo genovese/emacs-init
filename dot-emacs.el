@@ -1,23 +1,27 @@
 ;;; -*- mode: emacs-lisp; lexical-binding: t; -*-
 
-(require 'package)
-(package-initialize)
 
-(require 'cl-lib)
+;;; Setup
+
+;; The script loading this one should initialize the package system, either
+;; directly or through cask. Otherwise, we need here something like
+;; (require 'package)
+;; (package-initialize)
+
 (eval-when-compile
-  (require 'use-package))
-(setq use-package-verbose t)
+  (require 'cl-lib)
+  (require 'subr-x)
+  (require 'use-package)
+  (setq use-package-verbose t))
 
-(use-package s
-  :config (defun s-str (obj) (format "%s" obj)))
 (use-package dash)
-(use-package f
-  :config (defalias 'f-slash* 'file-name-as-directory))
+(use-package s :config (defun s-str (obj) (format "%s" obj)))
+(use-package f :config (defalias 'f-slash* 'file-name-as-directory))
 (use-package ht)
 (use-package bind-key)
-(use-package diminish)
 (use-package hydra)
-(use-package pallet)  ; use pallet and cask to keep up-to-date package list
+(use-package diminish)
+(use-package pallet)  ; use with cask to keep up-to-date package list
 
 (defun load-local (name &optional type)
   "Load a package or module in the local init area."
@@ -99,47 +103,60 @@ symbol. For the moment, all *nix variants are converted to
 (defvar user-home-page     (get-preference 'user-home-page))
 (defvar user-email-address (get-preference 'user-email-address))
 
+(setq my/custom-file
+      (let ((custom (locate-user-emacs-file "emacs-custom.el")))
+        (when (f-exists? custom) custom)))
+
+(setq my/env-file
+      (let ((envir (locate-user-emacs-file "my-env.el")))
+        (when (f-exists? envir) envir)))
+
+(setq my/theme-func (get-preference 'theme-function))
+
 
 ;;; Main operating settings
 
-(setq inhibit-startup-message t)
-(setq load-prefer-newer t)
-(setq initial-major-mode 'lisp-interaction-mode)
-(setq-default case-fold-search nil)
-(setq-default indent-tabs-mode nil)
-(setq-default shift-select-mode nil)
-(setq         shift-select-mode nil)
-(setq-default next-line-add-newlines nil)
-(setq scroll-error-top-bottom t)
-(setq switch-to-visible-buffer nil)
+(setq inhibit-startup-message  t
+      load-prefer-newer        t
+      case-fold-search         nil
+      indent-tabs-mode         nil
+      shift-select-mode        nil
+      scroll-error-top-bottom  t
+      switch-to-visible-buffer nil
+      history-length           1024
+      initial-major-mode       'lisp-interaction-mode)
+
+(setq-default fill-column            '72
+              case-fold-search       nil
+              indent-tabs-mode       nil
+              shift-select-mode      nil
+              next-line-add-newlines nil)
 
 (foreach (s '(tool-bar-mode scroll-bar-mode tooltip-mode delete-selection-mode))
-  (if (fboundp s) (funcall s -1)))
+  (if (fboundp s) (funcall s -1))) ; disable some operational modes
 
 (foreach (s '(eval-expression narrow-to-region narrow-to-page scroll-left
               downcase-region upcase-region set-goal-column))
-  (put s 'disabled nil))
+  (put s 'disabled nil)) ; allow some useful operations
 
-(setq custom-file (locate-user-emacs-file "emacs-custom.el"))
-(setq my/theme-func 'my/zenburn)
-
-(setq-default fill-column '72)
-(setq history-length 512)
 (setq paragraph-start paragraph-separate            ; Use blank lines to separate paragraphs by default
       adaptive-fill-regexp "[ \t]*\\([>*%#]+ +\\)?" ; Fill around comment beginnings and yanked-messages
       sentence-end-double-space nil                 ; Allow frenchspacing
       page-delimiter "^\\(\f\\|\n\n+\\)")           ; FF or 2+ consecutive blank lines
+
 (setq print-length 1024                 ; Give more information about objects in help
       print-level  8
       eval-expression-print-length 1024 ; ...and in *elisp*
       eval-expression-print-level  8)
 
 (setq-default major-mode 'org-mode)
-(setq display-time-format "%R")
-(setq display-time-24hr-format t)
-(setq kill-read-only-ok t)               ; OK to use kill to copy text in read-only buffer
-(setq indicate-empty-lines t)            ; show empty lines at end of file
-(setq my/keep-scratch-buf "*elisp*")     ; if nil, delete; if string, new name; otherwise leave alone.
+(setq display-time-format      "%R"
+      display-time-24hr-format t)
+
+(setq kill-read-only-ok     t  ; OK to use kill to copy text in read-only buffer
+      indicate-empty-lines  t) ; show empty lines at end of file
+
+(setq my/keep-scratch-buf "*elisp*") ; nil: delete; string: new name; else: as is
 
 (setq browse-url-browser-function 'browse-url-firefox
       browse-url-firefox-new-window-is-tab t
@@ -150,27 +167,27 @@ symbol. For the moment, all *nix variants are converted to
       help-event-list (nconc (list ?\M-\C-h) help-event-list) ; only keys allowed
       help-char 0) ; want ?\M-\C-h but that's not a char, causes problems
 
-(setq python-shell-interpreter "python3")
+(setq python-shell-interpreter
+      (get-preference 'python-command "python3"))
 
 
 ;;; Windowing-Specific Operational Settings
 
 (when window-system
-  (setq frame-title-format '("" invocation-name " <%b>"))
   (mouse-wheel-mode  t)
   (blink-cursor-mode t)
   (setq visible-bell t)
-  (set-cursor-color "#dfaf8f"))
+  (set-cursor-color (get-preference 'cursor-color)))
 
 
 ;;; Frames
 
-(setq initial-frame-alist '((top . 1) (left . 1)
+(setq initial-frame-alist `((top . 1) (left . 1)
                             (width . 206) (height . 70) ; in Anonymous Pro; 268 x 72 in Andale Mono
-                            (cursor-color . "#dfaf8f"))
+                            (cursor-color . ,(get-preference 'cursor-color)))
       default-frame-alist `((top . 32) (left . 16)      ; was 48,24
                             (width . 196) (height . 64)
-                            (cursor-color . "#dfaf8f")
+                            (cursor-color . ,(get-preference 'cursor-color))
                             (menu-bar-lines . 1) (tool-bar-lines . 0)))
 
 (defvar frame-title-prefix nil
@@ -1017,7 +1034,6 @@ symbol. For the moment, all *nix variants are converted to
 (define-key help-map "\C-f"   'describe-face)
 (define-key help-map "E"      'view-emacs-FAQ)
 (define-key help-map "F"      'describe-face)
-(define-key help-map "\C-i"   'Info-goto-emacs-command-node) ; might be easier in practice
 (define-key help-map "I"      'Info-goto-emacs-command-node) ; for help-mode consistency
 (define-key help-map "\M-i"   'describe-input-method)        ; not often needed
 (define-key help-map "T"      'describe-text-properties) 
@@ -1445,17 +1461,9 @@ symbol. For the moment, all *nix variants are converted to
      ((null my/keep-scratch-buf)
       (kill-buffer scratch-buf))))
 
-;; load additional environment variables, if any
-;; Note: Mac OS X uses ~/.MacOSX/environment.plist
-;; Might also want some emacs-specific environment settings.
-;; ON 10.8 can use launchctl to set environment variables
-;; Need to ensure that exec-path is properly set before anything
-;; that needs it! (e.g., nrepl)
-(let ((envir (locate-user-emacs-file "my-env.el")))
-  (when (file-exists-p envir)
-    (load-file envir)))  
-
-(load-file custom-file)  ;; customization-specific settings
+;; Load extra settings from the environment and from customize
+(when my/env-file (load-file my/env-file))       ; my environment variables
+(when my/custom-file (load-file my/custom-file)) ; saved customize settings
 
 ;; start in the shell, using *unix* rather than *shell* as buffer name
 (let* ((shell-buf (generate-new-buffer-name "*unix*")))
@@ -1466,9 +1474,12 @@ symbol. For the moment, all *nix variants are converted to
 (when (and window-system my/theme-func (fboundp my/theme-func))
   (funcall my/theme-func))
 
-;; Tidy up mode line
+;; Tidy up minor-mode lighters on the mode line
 (ignore-errors
-  (diminish 'magit-auto-revert-mode))
+  (when (featurep 'diminish)
+    (let ((lighters (get-preference 'lighters)))
+      (dolist (lighter lighters)
+        (diminish (car lighter) (cdr lighter))))))
 
 ;; Load current prototype code
 (let ((proto (locate-user-emacs-file "init/proto.el")))
