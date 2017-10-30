@@ -1,19 +1,19 @@
 #!/bin/sh
 
 # Default option values
-USE_CASK=''
-TARGET=".."
-VERSION="0.0.3.20171029"
-PACKAGE_LABEL="package"
-PACKAGE_IN="((package-system :$PACKAGE_LABEL))"
-PACKAGE_OUT="$PACKAGE_IN"
-NO_INIT=''
-NO_EXTRAS=''
-WITH_CUSTOM=''
-WITH_ENV=''
-SAFE=''
-DRY_RUN=''
-VERBOSE=''
+use_cask=''
+target=".."
+version="0.0.3.20171029"
+package_label="package"
+package_in="((package-system :$package_label))"
+package_out="$package_in"
+no_init=''
+no_extras=''
+with_custom=''
+with_env=''
+safe=''
+dry_run=''
+verbose=''
 
 usage () {
     echo "Installs emacs init files in target directory"
@@ -44,8 +44,8 @@ usage () {
 }    
 
 check_cask () {
-    USE_CASK=`command -v cask`
-    if [[ -z "$USE_CASK" ]]; then
+    use_cask=`command -v cask`
+    if [[ -z "$use_cask" ]]; then
       echo "ERROR: --cask specified but cask command cannot be found"
       exit 1
     fi
@@ -59,56 +59,56 @@ while [ "$1" != "" ]; do
             exit
             ;;
         -v | --version)
-            echo "$VERSION"
+            echo "$version"
             exit
             ;;
         --safe)
-            SAFE='-n'
+            safe='-n'
             ;;
         --with-custom)
-            WITH_CUSTOM='true'
+            with_custom='true'
             ;;
         --with-env)
-            WITH_ENV='true'
+            with_env='true'
             ;;
         --no-home)
-            NO_INIT='true'
+            no_init='true'
             ;;
         --no-extras)
-            NO_EXTRAS='true'
+            no_extras='true'
             ;;
         --cask)
             check_cask
             ;;
         --minimal)
-            NO_INIT='true'
-            WITH_CUSTOM=''
-            WITH_ENV=''
-            USE_CASE=''
+            no_init='true'
+            with_custom=''
+            with_env=''
+            use_case=''
             ;;
         --full)
-            WITH_CUSTOM='true'
-            VERBOSE='--verbose'
+            with_custom='true'
+            verbose='--verbose'
             check_cask
             ;;
         --dry-run)
-            DRY_RUN='true'
+            dry_run='true'
             ;;
         --verbose)
-            VERBOSE='--verbose'
+            verbose='--verbose'
             ;;
         *)
-            PARAM=`echo $1 | sed 's/=.*$//'`
-            VALUE=`echo $1 | sed 's/^[^=]*=//'`
-            case $PARAM in
+            param=`echo $1 | sed 's/=.*$//'`
+            value=`echo $1 | sed 's/^[^=]*=//'`
+            case $param in
                 --target)
-                    TARGET=$VALUE
+                    target=$value
                     ;;
                 --package)
-                    case $VALUE in
+                    case $value in
                         package|cask|cask-homebrew)
-                            PACKAGE_LABEL="$VALUE"
-                            PACKAGE_OUT="((package-system :$VALUE))"
+                            package_label="$value"
+                            package_out="((package-system :$value))"
                             ;;
                         *)
                             echo "ERROR: --package value should be package, cask, or cask-homebrew"
@@ -119,7 +119,7 @@ while [ "$1" != "" ]; do
                     esac
                     ;;
                 *)
-                    echo "ERROR: unknown parameter \"$PARAM\""
+                    echo "ERROR: unknown parameter \"$param\""
                     echo ""
                     usage
                     exit 1
@@ -130,60 +130,60 @@ while [ "$1" != "" ]; do
 done
 
 # Need target as absolute path for the home init file
-if [[ -z "$NO_INIT" ]]; then
-  ABS_TARGET=`cd "$TARGET"; pwd`
+if [[ -z "$no_init" ]]; then
+  abs_target=`cd "$target"; pwd`
 fi
 
 # Recursive copies
-COPY=`command -v rsync`
-if [[ -z "$COPY" ]]; then
-  COPY='cp -R $SAFE'
+copy=`command -v rsync`
+if [[ -z "$copy" ]]; then
+  copy='cp -R $safe'
 else
-  COPY="$COPY -a ${SAFE:+ --ignore-existing}"
+  copy="$copy -a ${safe:+ --ignore-existing}"
 fi
 
 # Main Steps (This is most definitely *not* DRY, but it does give a dry run. Ha!)
-if [[ -n "$DRY_RUN" || -n "$VERBOSE" ]]; then
-    [[ -d $TARGET/init ]]      || echo "mkdir -p $TARGET/init"
-    [[ -d $TARGET/site-lisp ]] || echo "mkdir -p $TARGET/site-lisp"
-    [[ -d $TARGET/themes ]]    || echo "mkdir -p $TARGET/themes"
-    [[ ./ -ef $TARGET/init ]]  || echo "$COPY ./[a-z]* $TARGET/init"
-    [[ -n "$NO_EXTRAS" ]]      || echo "$COPY Extras/site-lisp $TARGET"
-    [[ -n "$NO_EXTRAS" ]]      || echo "$COPY Extras/themes $TARGET"
-    [[ -n "$NO_EXTRAS" ]]      || echo "cp $SAFE Extras/Cask $TARGET"
-    [[ -n "$WITH_CUSTOM" ]] && echo "cp $SAFE Extras/emacs-custom.el $TARGET"
-    [[ -z "$WITH_CUSTOM" && ! -e $TARGET/emacs-custom.el ]] && echo "echo '' > $TARGET/emacs-custom.el"
-    [[ -n "$WITH_ENV" ]] && echo "cp $SAFE Extras/my-env.el $TARGET"
-    if [[ -z "$NO_INIT" ]]; then
-        if [[ "$PACKAGE_IN" = "$PACKAGE_OUT" ]]; then
-            echo "cat Extras/home-dot-emacs.el | sed 's:TARGET:$ABS_TARGET:' > $HOME/.emacs.el"
+if [[ -n "$dry_run" || -n "$verbose" ]]; then
+    [[ -d $target/init ]]      || echo "mkdir -p $target/init"
+    [[ -d $target/site-lisp ]] || echo "mkdir -p $target/site-lisp"
+    [[ -d $target/themes ]]    || echo "mkdir -p $target/themes"
+    [[ ./ -ef $target/init ]]  || echo "$copy ./[a-z]* $target/init"
+    [[ -n "$no_extras" ]]      || echo "$copy Extras/site-lisp $target"
+    [[ -n "$no_extras" ]]      || echo "$copy Extras/themes $target"
+    [[ -n "$no_extras" ]]      || echo "cp $safe Extras/Cask $target"
+    [[ -n "$with_custom" ]] && echo "cp $safe Extras/emacs-custom.el $target"
+    [[ -z "$with_custom" && ! -e $target/emacs-custom.el ]] && echo "echo '' > $target/emacs-custom.el"
+    [[ -n "$with_env" ]] && echo "cp $safe Extras/my-env.el $target"
+    if [[ -z "$no_init" ]]; then
+        if [[ "$package_in" = "$package_out" ]]; then
+            echo "cat Extras/home-dot-emacs.el | sed 's:TARGET:$abs_target:' > $HOME/.emacs.el"
         else
-            echo "cat Extras/home-dot-emacs.el | sed 's/$PACKAGE_IN/$PACKAGE_OUT/;s:TARGET:$ABS_TARGET:' > $HOME/.emacs.el"
+            echo "cat Extras/home-dot-emacs.el | sed 's/$package_in/$package_out/;s:TARGET:$abs_target:' > $HOME/.emacs.el"
         fi
     fi
-    [[ -n "$USE_CASK" ]] && echo "(cd $TARGET; $USE_CASK install $VERBOSE)"
+    [[ -n "$use_cask" ]] && echo "(cd $target; $use_cask install $verbose)"
 fi
 
-if [[ -z "$DRY_RUN" ]]; then
-    [[ -d $TARGET/init ]]      || mkdir -p $TARGET/init
-    [[ -d $TARGET/site-lisp ]] || mkdir -p $TARGET/site-lisp
-    [[ -d $TARGET/themes ]]    || mkdir -p $TARGET/themes
-    [[ ./ -ef $TARGET/init ]]  || $COPY ./[a-z]* $TARGET/init
-    [[ -n "$NO_EXTRAS" ]]      || $COPY Extras/site-lisp $TARGET
-    [[ -n "$NO_EXTRAS" ]]      || $COPY Extras/themes $TARGET
-    [[ -n "$NO_EXTRAS" ]]      || cp $SAFE Extras/Cask $TARGET
-    [[ -n "$WITH_CUSTOM" ]] && cp $SAFE Extras/emacs-custom.el $TARGET
-    [[ -z "$WITH_CUSTOM" && ! -e $TARGET/emacs-custom.el ]] && echo '' > $TARGET/emacs-custom.el
-    [[ -n "$WITH_ENV" ]] && cp $SAFE Extras/my-env.el $TARGET
-    if [[ -z "$NO_INIT" ]]; then
-        if [[ "$PACKAGE_IN" = "$PACKAGE_OUT" ]]; then
-            cat Extras/home-dot-emacs.el | sed "s:TARGET:$ABS_TARGET:" > $HOME/.emacs.el
+if [[ -z "$dry_run" ]]; then
+    [[ -d $target/init ]]      || mkdir -p $target/init
+    [[ -d $target/site-lisp ]] || mkdir -p $target/site-lisp
+    [[ -d $target/themes ]]    || mkdir -p $target/themes
+    [[ ./ -ef $target/init ]]  || $copy ./[a-z]* $target/init
+    [[ -n "$no_extras" ]]      || $copy Extras/site-lisp $target
+    [[ -n "$no_extras" ]]      || $copy Extras/themes $target
+    [[ -n "$no_extras" ]]      || cp $safe Extras/Cask $target
+    [[ -n "$with_custom" ]] && cp $safe Extras/emacs-custom.el $target
+    [[ -z "$with_custom" && ! -e $target/emacs-custom.el ]] && echo '' > $target/emacs-custom.el
+    [[ -n "$with_env" ]] && cp $safe Extras/my-env.el $target
+    if [[ -z "$no_init" ]]; then
+        if [[ "$package_in" = "$package_out" ]]; then
+            cat Extras/home-dot-emacs.el | sed "s:TARGET:$abs_target:" > $HOME/.emacs.el
         else
-            cat Extras/home-dot-emacs.el | sed "s/$PACKAGE_IN/$PACKAGE_OUT/;s:TARGET:$ABS_TARGET:" > $HOME/.emacs.el
+            cat Extras/home-dot-emacs.el | sed "s/$package_in/$package_out/;s:TARGET:$abs_target:" > $HOME/.emacs.el
         fi
     fi
-    [[ -n "$USE_CASK" ]] && (cd $TARGET; $USE_CASK install $VERBOSE)
-    echo "Emacs initialization installed in $TARGET (package $PACKAGE_LABEL, use cask? ${USE_CASK:-false})."
-    echo "Next step: Edit $TARGET/init/data/preferences.el to set your individual preferences."
+    [[ -n "$use_cask" ]] && (cd $target; $use_cask install $verbose)
+    echo "Emacs initialization installed in $target (package $package_label, use cask? ${use_cask:-false})."
+    echo "Next step: Edit $target/init/data/preferences.el to set your individual preferences."
 fi  
 
