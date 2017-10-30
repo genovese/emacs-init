@@ -232,8 +232,8 @@ See `set-preferences' and `get-preference'.")
       (kill-buffer scratch-buf))))
 
 ;; Load extra settings from the environment and from customize
-(when user-env-file (load-file my/env-file))       ; my environment variables
-(when user-custom-file (load-file my/custom-file)) ; saved customize settings
+(when user-env-file (load-file user-env-file))       ; my environment variables
+(when user-custom-file (load-file user-custom-file)) ; saved customize settings
 
 ;; Start in the shell, in a single, full-frame window.
 ;; Name buffer *unix* rather than *shell* because it's easier to complete.
@@ -254,8 +254,8 @@ See `set-preferences' and `get-preference'.")
         (diminish (car lighter) (cdr lighter))))))
 
 ;; Load current prototype code
-(dolist ((proto (directory-files
-                 (locate-user-emacs-file "init/prototypes") t "\\.el\\'")))
+(dolist (proto (directory-files
+                (locate-user-emacs-file "init/prototypes") t "\\.el\\'"))
   (when (file-exists-p proto)
     (load-file proto)))
 

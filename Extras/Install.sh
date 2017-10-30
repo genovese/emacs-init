@@ -177,7 +177,7 @@ if [[ -z "$DRY_RUN" ]]; then
     [[ -n "$WITH_ENV" ]] && cp $SAFE Extras/my-env.el $TARGET
     if [[ -z "$NO_INIT" ]]; then
         if [[ "$PACKAGE_IN" = "$PACKAGE_OUT" ]]; then
-            cat Extras/home-dot-emacs.el | sed "s/TARGET/$ABS_TARGET/" > $HOME/.emacs.el
+            cat Extras/home-dot-emacs.el | sed "s:TARGET:$ABS_TARGET:" > $HOME/.emacs.el
         else
             cat Extras/home-dot-emacs.el | sed "s/$PACKAGE_IN/$PACKAGE_OUT/;s:TARGET:$ABS_TARGET:" > $HOME/.emacs.el
         fi
