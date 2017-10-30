@@ -1,23 +1,14 @@
-;;; -*- mode: emacs-lisp; lexical-binding: t; -*-
+;;; theme-support.el -- custom theme loading and hooks -*- lexical-binding: t; -*-
 
-;; crg-themes --- theme settings and utilities
-;;
-;; Copyright (C) 2014 Christopher R. Genovese, all rights reserved.
-
+;; Copyright (C) 2014-2017 Christopher R. Genovese, all rights reserved.
 ;; Author: Christopher Genovese <genovese@cmu.edu>
-;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
-;; URL: http://www.stat.cmu.edu/~genovese/emacs/
-
-;; Version: 1.0.0
-;; Update#: 1
-;; Created:      Thu 17 Aug 2017
-;; Last-Updated: Thu 17 Aug 2017 at 13:30 EDT
-;; By: Christopher R. Genovese
+;; Version: 1.2.0
 
 ;;; Commentary:
+;;  These utilities are only for daily use, not for use within distributed
+;;  packages. Hence, some of the functions are unprefixed, some replace
+;;  existing functions, and some use the `my/' prefix if its seems appropriate.
 
-;; These utilities are used in my init file (and emacs sessions).
-;; Hence, they are unprefixed.
 
 ;;; Code:
 
@@ -44,6 +35,5 @@
   (enable-theme 'zenburn+)
   (my/zenburn+-on-hook))
 
-(provide 'crg-themes)
 
-;;; crg-themes.el ends here
+;;; theme-support.el ends here

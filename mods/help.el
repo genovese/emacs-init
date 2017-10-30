@@ -5,7 +5,7 @@
 ;; Author: Christopher R. Genovese <genovese@cmu.edu>
 ;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
 ;; Keywords: emacs help
-;; Version: 0.0.1
+;; Version: 0.0.2
 
 
 ;;; License:
@@ -44,6 +44,10 @@
 ;; * Adjusted keybindings in help-mode.
 ;;
 ;;   Slightly different from the default, but I find them much nicer.
+;;   Note: The help-map bindings (the keys after C-M-h) have been moved
+;;   to keybindings.el, which must be loaded after this mod. The
+;;   bindings in help-mode (inside help buffer) remain here for various
+;;   reasons.
 ;;
 ;; * Avoiding view-mode shadowing of help-mode key bindings.
 ;;
@@ -263,14 +267,6 @@ see `my/help-override-view-map'.")
   '(dolist (binding my/help-keybindings)
      (define-key help-mode-map (car binding) (cdr binding))))
 
-(eval-after-load 'help
-  '(progn
-     (define-key help-map "g" 'my/help-goto-help)
-     (define-key help-map "\C-v" 'scroll-help-window-forward)
-     (define-key help-map "\C-w" 'scroll-help-window-backward)
-     (define-key help-map "\M-v" 'end-of-help-buffer)
-     (define-key help-map "\M-w" 'beginning-of-help-buffer)))
-
 ;;ATTN:24.4
 (defadvice help-make-xrefs (after unshadow-view-keys last activate)
   "The variable `minor-mode-overriding-map-alist' is reset in
@@ -367,27 +363,6 @@ Examples:
                   ,fun
                   (bind-key ,key ',name ,map)
                   ',name)))))))
-
-(my/define-remote-help-command
- "Move forward to the next help button, or the nth next with prefix arg."
- :key "TAB"
- (forward-button
-  (prefix-numeric-value current-prefix-arg) 'wrap))
-
-(my/define-remote-help-command
- "Move backward to the previous help button, or the nth previous with prefix arg."
- :key "<backtab>"
- (backward-button
-  (prefix-numeric-value current-prefix-arg) 'wrap))
-
-(my/define-remote-help-command :key "C-b" (help-go-back))
-(my/define-remote-help-command :key "C-f" (help-go-forward))
-(my/define-remote-help-command :key "C-v" (cua-scroll-up))
-(my/define-remote-help-command :key "C-w" (cua-scroll-down))
-(my/define-remote-help-command :key "M-v" (end-of-buffer))
-(my/define-remote-help-command :key "M-w" (beginning-of-buffer))
-(my/define-remote-help-command :key "RET" (push-button)) ;was (help-follow-symbol)
-(my/define-remote-help-command :key "q"   (quit-window))
 
 
 ;;; mods/help.el ends here

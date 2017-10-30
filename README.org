@@ -217,6 +217,10 @@
       =theme-function=. Simply edit the strings to the right of those
       keys.
 
+   In this case, note that the shell script =Extras/Update.sh= allows
+   for simple updating of the Extras files (e.g., =Cask=) from the
+   working initialization directory.
+
 ** Appendix: Install script overview
 
    For reference purposes, the =Extras/Install.sh= script roughly does

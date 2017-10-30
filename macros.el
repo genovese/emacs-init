@@ -1,18 +1,8 @@
-;;; -*- mode: emacs-lisp; lexical-binding: t; -*-
+;;; macros.el --- init-file macros -*- lexical-binding: t; -*-
 
-;; crg-macros --- init-file macros
-;; Copyright (C) 2014 Christopher R. Genovese, all rights reserved.
-
+;; Copyright (C) 2014-2017 Christopher R. Genovese, all rights reserved.
 ;; Author: Christopher Genovese <genovese@cmu.edu>
-;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
-;; URL: http://www.stat.cmu.edu/~genovese/emacs/
-
-;; Version: 1.0.0
-;; Update#: 1
-;; Package-Requires: ((ht "1.0") (cl-lib "1.0"))
-;; Created:      Wed 05 Nov 2014
-;; Last-Updated: Fri 07 Nov 2014 at 16:27 EST
-;; By: Christopher R. Genovese
+;; Version: 1.2.0
 
 
 ;;; Code:
@@ -136,4 +126,5 @@ unique number via `cl-gensym'."
               while ,x do
               (ht-set! ,table (car ,x) (cadr ,x) ))))
 
-(provide 'crg-macros)
+
+;;; macros.el ends here

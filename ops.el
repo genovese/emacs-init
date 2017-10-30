@@ -1,29 +1,21 @@
-;;; -*- mode: emacs-lisp; lexical-binding: t; -*-
+;;; ops.el --- operational utilities -*- lexical-binding: t; -*-
 
-;; crg-utils --- operational utilities for emacs init and sessions
-;; Copyright (C) 2014 Christopher R. Genovese, all rights reserved.
-
+;; Copyright (C) 2014-2017 Christopher R. Genovese, all rights reserved.
 ;; Author: Christopher Genovese <genovese@cmu.edu>
-;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
-;; URL: http://www.stat.cmu.edu/~genovese/emacs/
-
-;; Version: 1.0.0
-;; Update#: 1
-;; Created:      Wed 05 Nov 2014
-;; Last-Updated: Fri 07 Nov 2014 at 16:27 EST
-;; By: Christopher R. Genovese
+;; Version: 1.2.0
 
 ;;; Commentary:
+;;  These utilities are only for daily use, not for use within distributed
+;;  packages. Hence, some of the functions are unprefixed, some replace
+;;  existing functions, and some use the `my/' prefix if its seems appropriate.
 
-;; These utilities are used in my init file (and emacs sessions).
-;; Hence, they are unprefixed.
 
 ;;; Code:
 
-;ATTN: consider adapting this like forward-list-or-char below.
-;ALSO: There is a common abstraction here for many of the navigation
-;      commands. Consider writing a macro to handle the transformation.
-;      use the model below for forward-list-or-char
+;;ATTN: consider adapting this like forward-list-or-char below.
+;;ALSO: There is a common abstraction here for many of the navigation
+;;      commands. Consider writing a macro to handle the transformation.
+;;      use the model below for forward-list-or-char
 (defun forward-sexp-or-char (&optional arg)
   "Move forward across one balanced expression (sexp) or forward
 one character if none. With ARG, do it that many times.  Negative
@@ -422,17 +414,21 @@ of the current buffer (for special-purpose buffers)."
         ((string-match "^ \\*" (buffer-name (current-buffer)))
          (bury-buffer))))
 
+
+;; Backup File Names
+;;
+;; ATTN: need to redefine `make-backup-file-name', `backup-file-name-p', and
+;; `file-name-sans-version'  to be consistent with each other. (The latter
+;; is odd.) Note also the variable `make-backup-file-name-function'
+;; which can be used instead of wholesale redefining
+;; make-backup-file-name but since I have to redefine two others, might
+;; as well redefine all three
+
 (defun make-backup-file-name (file)
   "Create the non-numeric backup file name for FILE.
 This is a separate function so you can redefine it for customization."
   (concat (file-name-directory file)
           (concat "." (concat (file-name-nondirectory file) "~"))))
-
-;;ATTN: need to redefine `backup-file-name-p' and `file-name-sans-version' also
-;; to be consistent with the above definition!
-;; Note also the variable `make-backup-file-name-function'
-;; which can be used instead of wholesale redefining make-backup-file-name
-;; but since I have to redefine two others, might as well redefine all three
 
 (defun backup-file-name-p (file)
   "Return non-nil if FILE is a backup file name (numeric or not).
@@ -463,4 +459,5 @@ See also `file-name-version-regexp'."
                    (string-match (concat file-name-version-regexp "\\'")
                                  name))))))
 
-(provide 'crg-ops)
+;;; ops.el ends here
+

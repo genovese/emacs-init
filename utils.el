@@ -1,23 +1,13 @@
-;;; -*- mode: emacs-lisp; -*-
+;;; utils.el -- elisp utilities that've proven useful -*- lexical-binding: t; -*-
 
-;; crg-utils --- a variety of emacs-lisp utilities
-;; Copyright (C) 2014 Christopher R. Genovese, all rights reserved.
-
+;; Copyright (C) 2014-2017 Christopher R. Genovese, all rights reserved.
 ;; Author: Christopher Genovese <genovese@cmu.edu>
-;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
-;; URL: http://www.stat.cmu.edu/~genovese/emacs/
-
-;; Version: 1.0.0
-;; Update#: 1
-;; Package-Requires: ((f "1.0"))
-;; Created:      Wed 05 Nov 2014
-;; Last-Updated: Fri 07 Nov 2014 at 16:27 EST
-;; By: Christopher R. Genovese
+;; Version: 1.2.0
 
 ;;; Commentary:
-
-;; These utilities are used in my init file (and emacs sessions).
-;; Hence, they are unprefixed.
+;;  These utilities are only for daily use, not for use within distributed
+;;  packages. Hence, some of the functions are unprefixed, some replace
+;;  existing functions, and some use the `my/' prefix if its seems appropriate.
 
 
 ;;; Code:
@@ -142,4 +132,5 @@ deeper subdirectories"
            load-path)
          load-path)))
 
-(provide 'crg-utils)
+;;; utils.el ends here
+

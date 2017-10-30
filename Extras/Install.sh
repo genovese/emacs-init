@@ -129,6 +129,11 @@ while [ "$1" != "" ]; do
     shift
 done
 
+# Need target as absolute path for the home init file
+if [[ -z "$NO_INIT" ]]; then
+  ABS_TARGET=`cd "$TARGET"; pwd`
+fi
+
 # Recursive copies
 COPY=`command -v rsync`
 if [[ -z "$COPY" ]]; then
@@ -151,9 +156,9 @@ if [[ -n "$DRY_RUN" || -n "$VERBOSE" ]]; then
     [[ -n "$WITH_ENV" ]] && echo "cp $SAFE Extras/my-env.el $TARGET"
     if [[ -z "$NO_INIT" ]]; then
         if [[ "$PACKAGE_IN" = "$PACKAGE_OUT" ]]; then
-            echo "cat Extras/home-dot-emacs.el | sed 's:TARGET:$TARGET:' > $HOME/.emacs.el"
+            echo "cat Extras/home-dot-emacs.el | sed 's:TARGET:$ABS_TARGET:' > $HOME/.emacs.el"
         else
-            echo "cat Extras/home-dot-emacs.el | sed 's/$PACKAGE_IN/$PACKAGE_OUT/;s:TARGET:$TARGET:' > $HOME/.emacs.el"
+            echo "cat Extras/home-dot-emacs.el | sed 's/$PACKAGE_IN/$PACKAGE_OUT/;s:TARGET:$ABS_TARGET:' > $HOME/.emacs.el"
         fi
     fi
     [[ -n "$USE_CASK" ]] && echo "(cd $TARGET; $USE_CASK install $VERBOSE)"
@@ -172,9 +177,9 @@ if [[ -z "$DRY_RUN" ]]; then
     [[ -n "$WITH_ENV" ]] && cp $SAFE Extras/my-env.el $TARGET
     if [[ -z "$NO_INIT" ]]; then
         if [[ "$PACKAGE_IN" = "$PACKAGE_OUT" ]]; then
-            cat Extras/home-dot-emacs.el | sed "s/TARGET/$TARGET/" > $HOME/.emacs.el
+            cat Extras/home-dot-emacs.el | sed "s/TARGET/$ABS_TARGET/" > $HOME/.emacs.el
         else
-            cat Extras/home-dot-emacs.el | sed "s/$PACKAGE_IN/$PACKAGE_OUT/;s:TARGET:$TARGET:" > $HOME/.emacs.el
+            cat Extras/home-dot-emacs.el | sed "s/$PACKAGE_IN/$PACKAGE_OUT/;s:TARGET:$ABS_TARGET:" > $HOME/.emacs.el
         fi
     fi
     [[ -n "$USE_CASK" ]] && (cd $TARGET; $USE_CASK install $VERBOSE)
