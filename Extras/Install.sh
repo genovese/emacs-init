@@ -3,10 +3,10 @@
 # Default option values
 use_cask=''
 target=".."
-version="0.0.3.20171029"
-package_label="package"
+version="0.0.4.20171029"
+package_label='package'
 package_in="((package-system :$package_label))"
-package_out="$package_in"
+package_out=''
 no_init=''
 no_extras=''
 with_custom=''
@@ -40,7 +40,9 @@ usage () {
     echo "  --verbose       Display steps while execute them."
     echo "  --help          Show this usage message."
     echo "  --version       Version information."
-
+    echo ""
+    echo "If --cask is supplied but not --package, attempts to deduce value of"
+    echo "package as either cask or cask-homebrew."
 }    
 
 check_cask () {
@@ -50,6 +52,19 @@ check_cask () {
       exit 1
     fi
 }    
+
+deduce_package () {
+    if [[ -n "$use_cask" ]]; then # try to auto-deduce which cask type
+      if [[ -n `command -v brew` && -e "/usr/local/share/emacs/site-lisp/cask/cask.el" ]]; then
+        package_label='cask-homebrew'
+      else
+        package_label='cask'
+      fi
+      package_out="((package-system :$package_label))"
+    else # No package transformation
+      package_out="$package_in"
+    fi
+}
 
 # Process Options
 while [ "$1" != "" ]; do
@@ -132,6 +147,11 @@ done
 # Need target as absolute path for the home init file
 if [[ -z "$no_init" ]]; then
   abs_target=`cd "$target"; pwd`
+fi
+
+# Deduce value of package if --cask is set
+if [[ -z "$package_out" ]]; then
+  deduce_package
 fi
 
 # Recursive copies

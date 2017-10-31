@@ -32,13 +32,22 @@
 (use-package diminish)
 (use-package pallet)  ; use with cask to keep up-to-date package list
 
-(defun load-local (name &optional type log)
-  "Load a package or module from the local init area."
-  (let* ((ltype (s-str (or type "")))
-         (ltype (if (keywordp type) (substring ltype 1) ltype))
-         (file  (f-join user-emacs-directory "init" ltype (s-str name))))
-    (when log (message "Loading file %s." file))
-    (load file t)))
+(let ((init-dir (if load-file-name 
+                    (f-dirname load-file-name)
+                  (f-join user-emacs-directory "init"))))
+  ;; init-dir is captured lexically in a closure for later use
+  (defun load-local (name &optional type)
+    "Load a package or module from the local init area."
+    (let* ((ltype (s-str (or type "")))
+           (ltype (if (keywordp type) (substring ltype 1) ltype))
+           (file  (f-join init-dir ltype (s-str name))))
+      (condition-case err
+          (load file)
+        (error (signal
+                (car err) (cons
+                           (format "Cannot load local init module %s (dir %s)."
+                                   file init-dir)
+                           (cdr err))))))))
 
 (defvar preferences (ht)
   "Table of user-specific preferences for configuring initialization.

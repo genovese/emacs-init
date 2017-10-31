@@ -1,6 +1,6 @@
 #+TITLE: Emacs Initialization
 #+AUTHOR: Christopher R. Genovese
-#+DATE: 28 Oct 2017
+#+DATE: 30 Oct 2017
 
 * Overview
 
@@ -9,7 +9,7 @@
 
   A few notable features:
 
-  + Non-standard Keybindings: Help
+  + Keybindings: Help
 
     Default emacs keybindings reserve =C-h= for help. While
     help is important and commonly used, it does not
@@ -26,7 +26,7 @@
     see =help-char=) assume =C-h= for help, which requires additional
     effort to configure.
 
-  + Non-standard Keybindings: Scrolling and Cutting
+  + Keybindings: Scrolling and Cutting
 
     Also in the default keybindings use =C-v= and =M-v= for scrolling up and
     down. This cuts across levels (control to meta) for a
@@ -72,14 +72,18 @@
     This initialization always starts the emacs-server so
     you can interact with a running instance using emacsclient.
 
-  + Mode Modifications
+  + Components and Mods
 
-    The =mods= directory contains mode- or tool-specific modifications
-    and code. This includes improved directory tracking systems
-    for tcsh and zsh (separately), extensions to dired, and some
-    extra tools for AucTeX and Org. Some of the earlier mods have
-    been spun off into their own packages (e.g., =win-switch=)
-    or into existing emacs code (e.g., =ibuffer=).
+    The =components= directory contains files that each load
+    and configure a cluster of related packages and/or modes.
+
+    The =mods= directory contains mode- or tool-specific modifications and
+    code. These represent structural changes or code that offers
+    new/improved functionality. This includes improved help navigation,
+    directory tracking systems for tcsh and zsh (separately), extensions
+    to dired, and some extra tools for AucTeX and Org. Some of the
+    earlier mods have been spun off into their own packages (e.g.,
+    =win-switch=) or into existing emacs code (e.g., =ibuffer=).
 
   + Zenburn+ Theme
 
@@ -239,6 +243,9 @@
       from this themes directory there.
    7. If =--cask= is given and cask is installed, move to $TARGET
       directory temporarily and do cask install.
+
+   If --package is not supplied, the script will attempt to auto-deduce
+   it, which is of particular note if --cask is also supplied.
 
 * File Manifest
 
