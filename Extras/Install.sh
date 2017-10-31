@@ -204,6 +204,8 @@ if [[ -z "$dry_run" ]]; then
     fi
     [[ -n "$use_cask" ]] && (cd $target; $use_cask install $verbose)
     echo "Emacs initialization installed in $target (package $package_label, use cask? ${use_cask:-false})."
-    echo "Next step: Edit $target/init/data/preferences.el to set your individual preferences."
+    echo "Next steps: * Edit $target/init/data/preferences.el to set your individual preferences."
+    [[ -n "$with_env" ]] && echo "            * Edit my-env.el to set PATH, TEXINPUTS, etc. for your file system."
+    echo "            * Start up emacs and get editing..."
 fi  
 

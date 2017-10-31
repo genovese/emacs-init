@@ -23,7 +23,3 @@
                         (company-mode)
                         (paredit-mode "()")
                         (eldoc-mode "Ed")))
-
-
-
-

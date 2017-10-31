@@ -21,7 +21,7 @@
              (append path? exec-path)
              (cl-delete-duplicates path? :test 'string-equal :from-end t)))
 
-(setq emacs-app-base-dir     # currently "/usr/local/Cellar/emacs/HEAD-3ad8ca4/"
+(setq emacs-app-base-dir     ; currently "/usr/local/Cellar/emacs/HEAD-3ad8ca4/"
       (thread-first "emacs"
         executable-find
         file-truename
