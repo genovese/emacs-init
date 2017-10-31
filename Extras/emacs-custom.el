@@ -62,9 +62,9 @@
     ((#("default" 0 1
         (idx 0))
       ("Org"
-       (directory . "/Users/genovese/org/"))
+       (directory . "~/org/"))
       ("Teaching"
-       (directory . "/Users/genovese/class/"))
+       (directory . "~/class/"))
       ("Documents"
        (or
         (mode . plain-tex-mode)
@@ -124,7 +124,7 @@
          (not starred-name))
         (name . "^\\*elisp\\*")))
       ("Arduino"
-       (directory . "/Users/genovese/Programming/Arduino/"))
+       (directory . "~/Programming/Arduino/"))
       ("REPLs"
        (or
         (mode . shell-mode)
@@ -613,7 +613,12 @@
          ((project-name
            (projectile-project-name)))
        (if
-           (equal project-name "-")
+           (or
+            (equal project-name "-")
+            (and
+             (fboundp
+              (quote magit-get-current-branch))
+             (magit-get-current-branch)))
            ""
          (format " Proj[%s]"
                  (projectile-project-name)))))))
@@ -625,8 +630,8 @@
  '(send-mail-function (quote mailclient-send-it))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
- '(user-full-name "Christopher R. Genovese")
- '(user-mail-address "genovese@cmu.edu")
+ ;'(user-full-name "Christopher R. Genovese")
+ ;'(user-mail-address "genovese@cmu.edu")
  '(win-switch-feedback-background-color "#93e0e3")
  '(win-switch-feedback-foreground-color "#5f7f5f")
  '(win-switch-window-threshold 0))
@@ -636,7 +641,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "#3f3f3f" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 140 :width normal :foundry "nil" :family "Anonymous Pro"))))
+ ;'(default ((t (:inherit nil :stipple nil :background "#3f3f3f" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 140 :width normal :foundry "nil" :family "Anonymous Pro"))))
  '(calendar-today ((t (:foreground "firebrick" :weight bold))))
  '(ediff-even-diff-A ((t (:background "#696059"))))
  '(ediff-even-diff-B ((t (:background "#696059"))))
