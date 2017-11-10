@@ -9,11 +9,16 @@
 (use-package ivy
   :config
   (progn
-    (define-key ivy-minibuffer-map (kbd "M-v") nil)
-    (define-key ivy-minibuffer-map (kbd "C-w") 'ivy-scroll-down-command)
+    (bind-key "M-x" 'counsel-M-x)
+    (bind-keys :map ivy-minibuffer-map
+               ("M-v")
+               ("C-w" . ivy-scroll-down-command))
     (setq ivy-wrap t)
     (global-set-key (kbd "C-x C-f") 'counsel-find-file)
     (setq counsel-find-file-ignore-regexp "\\(?:\\`[#.]\\)\\|\\(?:[#~]\\'\\)")
+    (ivy-set-actions t
+                     '(("y" ivy-yank-action "yank")))
+    (use-package ivy-hydra)
     (ivy-mode 1)))
 
 (use-package helm
@@ -41,11 +46,7 @@
             (bind-key "A-y"     'append-next-kill)))
 
 (use-package smex
-  ;:init (progn
-  ;        (bind-key "M-x" 'smex)
-  ;        (bind-key "M-X" 'smex-major-mode-commands))
   :config (progn
-            (bind-key "M-x" 'smex)
             (bind-key "M-X" 'smex-major-mode-commands)
             (setq smex-save-file (locate-user-emacs-file "smex-items"))
             (advice-add #'smex-prepare-ido-bindings :override

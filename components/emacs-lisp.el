@@ -7,9 +7,9 @@
             (bind-key "C-c e" 'macrostep-expand emacs-lisp-mode-map)))
 
 (add-my-hook emacs-lisp-mode-hook
-  (local-set-key "\C-c\C-e" 'eval-defun)
-  (local-set-key "\C-c\C-o" 'outline-minor-mode)
-  (local-set-key "\C-c\C-s" 'eval-last-sexp)
+  (local-set-key "\C-c\C-e" #'eval-defun)
+  (local-set-key "\C-c\C-o" #'outline-minor-mode)
+  (local-set-key "\C-c\C-s" #'eval-last-sexp)
   (local-set-key [(control ?\;)] 'comment-indent-new-line)
   (defun emacs-lisp-outline-minor-setup ()
     (setq outline-regexp ";;; \\|;; \\|(....")
@@ -22,9 +22,9 @@
 
 (add-hook 'emacs-lisp-mode-hook 'highlight-attn-words t)
 (add-hook 'emacs-lisp-mode-hook 'isearch-yank-hook)
-(add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode t)
-(add-hook 'emacs-lisp-mode-hook 'eldoc-mode t)
-(add-hook 'emacs-lisp-mode-hook 'fci-mode t)
+(add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
+(add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
+(add-hook 'emacs-lisp-mode-hook 'fci-mode)
 (add-hook 'emacs-lisp-mode-hook 'company-mode)
 
 (font-lock-add-keywords 'emacs-lisp-mode

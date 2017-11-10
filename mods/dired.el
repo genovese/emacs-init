@@ -557,6 +557,8 @@ Use this with care.
   (define-key dired-mode-map "%m"      'dired-mark-files-regexp)
   (define-key dired-mode-map "%M"      'dired-do-rename-regexp)
   (define-key dired-mode-map "%N"      'find-name-dired)
+  (define-key dired-mode-map "/P"      'dired-filter-pop-all)
+  (define-key dired-mode-map "//"      'dired-filter-by-directory)
   (define-key dired-mode-map "\M-c"    'dired-copy-filename-as-kill)
   (define-key dired-mode-map "\M-d"    'dired-tree-down)
   (define-key dired-mode-map "\M-g"    'diredp-do-grep)

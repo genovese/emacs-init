@@ -25,7 +25,7 @@
 (use-package dash)
 (use-package s :config (defun s-str (obj) (format "%s" obj)))
 (use-package f :config (defalias 'f-slash* 'file-name-as-directory))
-(use-package ht)
+(use-package ht) ;ATTN: could use builtin map library instead
 (use-package dash-functional)
 (use-package bind-key)
 (use-package hydra)

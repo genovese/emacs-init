@@ -122,6 +122,7 @@
 (define-key my/go-map "\M-p"   'previous-error)
 (define-key my/go-map "q"      'keyboard-quit)  
 (define-key my/go-map "Q"      'keyboard-escape-quit)  
+(define-key my/go-map "s"      'counsel-switch-to-shell-buffer)
 (define-key my/go-map "t"      'top-level)
 (define-key my/go-map "u"      'browse-url)
 (define-key my/go-map "x"      'exit-recursive-edit)
@@ -133,9 +134,11 @@
   "Search")
 (define-key my-search-map "a" 'ack)
 (define-key my-search-map "g" 'ag)
-(define-key my-search-map "h" 'helm) ;ATTN
+(define-key my-search-map "h" 'helm)
 (define-key my-search-map "o" 'helm-occur)
 (define-key my-search-map "r" 'ripgrep-regexp)
+(define-key my-search-map "R" 'counsel-rg)  ; ATTN: trying this out
+(define-key my-search-map "s" 'swiper)      ; ATTN: trying this out
 (define-key my-search-map "\C-f" 'find-file-in-project)
 (define-key my-search-map "\M-f" 'find-file-in-project-by-selected)
 (define-key my-search-map "f" 'helm-find-files)
@@ -289,43 +292,45 @@
 (dolist (event my/help-events)
   (global-set-key event 'help-command)) 
 
-(define-key help-map "\C-c"   'describe-key-briefly)
-(define-key help-map "\M-c"   'describe-copying)
-(define-key help-map "\C-f"   'describe-face)
-(define-key help-map "E"      'view-emacs-FAQ)
-(define-key help-map "F"      'describe-face)
-(define-key help-map "I"      'Info-goto-emacs-command-node) ; for help-mode consistency
-(define-key help-map "\M-i"   'describe-input-method)        ; not often needed
-(define-key help-map "T"      'describe-text-properties) 
-
 (with-eval-after-load 'help
-  (progn
-    (define-key help-map "g" 'my/help-goto-help)
-    (define-key help-map "\C-v" 'scroll-help-window-forward)
-    (define-key help-map "\C-w" 'scroll-help-window-backward)
-    (define-key help-map "\M-v" 'end-of-help-buffer)
-    (define-key help-map "\M-w" 'beginning-of-help-buffer)))
+  (bind-keys :map help-map
+    ("C-c" . describe-key-briefly)
+    ("M-c" . describe-copying)
+    ("E"   . view-emacs-FAQ)
+    ("f"   . counsel-describe-function)
+    ("F"   . counsel-describe-face)
+    ("C-f" . counsel-describe-face)
+    ("I"   . Info-goto-emacs-command-node) ; for help-mode consistency
+    ("M-i" . describe-input-method) ; not often needed
+    ("T"   . describe-text-properties) 
+    ("B"   . helm-descbinds) ; requires package helm-descbinds
+    ("M-b" . counsel-descbinds)
+    ;("C-v" . scroll-help-window-forward)
+    ;("C-w" . scroll-help-window-backward)
+    ;("M-v" . end-of-help-buffer)
+    ;("M-w" . beginning-of-help-buffer)
+    ("g"   . my/help-goto-help))
 
-(my/define-remote-help-command
- "Move forward to the next help button, or the nth next with prefix arg."
- :key "TAB"
- (forward-button
-  (prefix-numeric-value current-prefix-arg) 'wrap))
+  (my/define-remote-help-command
+   "Move forward to the next help button, or the nth next with prefix arg."
+   :key "TAB"
+   (forward-button
+    (prefix-numeric-value current-prefix-arg) 'wrap))
 
-(my/define-remote-help-command
- "Move backward to the previous help button, or the nth previous with prefix arg."
- :key "<backtab>"
- (backward-button
-  (prefix-numeric-value current-prefix-arg) 'wrap))
+  (my/define-remote-help-command
+   "Move backward to the previous help button, or the nth previous with prefix arg."
+   :key "<backtab>"
+   (backward-button
+    (prefix-numeric-value current-prefix-arg) 'wrap))
 
-(my/define-remote-help-command :key "C-b" (help-go-back))
-(my/define-remote-help-command :key "C-f" (help-go-forward))
-(my/define-remote-help-command :key "C-v" (cua-scroll-up))
-(my/define-remote-help-command :key "C-w" (cua-scroll-down))
-(my/define-remote-help-command :key "M-v" (end-of-buffer))
-(my/define-remote-help-command :key "M-w" (beginning-of-buffer))
-(my/define-remote-help-command :key "RET" (push-button)) ;was (help-follow-symbol)
-(my/define-remote-help-command :key "q"   (quit-window))
+  (my/define-remote-help-command :key "C-b" (help-go-back))
+  (my/define-remote-help-command :key "C-f" (help-go-forward))
+  (my/define-remote-help-command :key "C-v" (cua-scroll-up))
+  (my/define-remote-help-command :key "C-w" (cua-scroll-down))
+  (my/define-remote-help-command :key "M-v" (end-of-buffer))
+  (my/define-remote-help-command :key "M-w" (beginning-of-buffer))
+  (my/define-remote-help-command :key "RET" (push-button)) ;was (help-follow-symbol)
+  (my/define-remote-help-command :key "q"   (quit-window)))
 
 
 ;; Searching

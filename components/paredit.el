@@ -204,6 +204,7 @@
             (add-hook 'clojure-mode-hook #'enable-paredit-mode)
             (define-prefix-command 'paredit-sexp-map) 
             (define-key paredit-mode-map [(meta ?i)] 'paredit-sexp-map)
+            (define-key paredit-mode-map [(meta ??)] nil)
             (setq paredit-commands my/paredit-commands)
             (paredit-define-keys)
             (paredit-annotate-mode-with-examples)))
