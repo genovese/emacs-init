@@ -1,7 +1,7 @@
 ;;; dot-emacs.el --- main emacs initialization file -*- lexical-binding: t; -*-
 
 ;; Author: Christopher Genovese <genovese@cmu.edu>
-;; Version: 2.4.0
+;; Version: 2.4.2
 
 ;;; Commentary
 ;;  This file is designed to be loaded from a higher-level entry point.
@@ -241,8 +241,10 @@ See `set-preferences' and `get-preference'.")
       (kill-buffer scratch-buf))))
 
 ;; Load extra settings from the environment and from customize
-(when user-env-file (load-file user-env-file))       ; my environment variables
-(when user-custom-file (load-file user-custom-file)) ; saved customize settings
+(when user-env-file (load-file user-env-file))  ; my environment variables
+(when user-custom-file                          ; saved customize settings
+  (setq custom-file user-custom-file)
+  (load-file user-custom-file)) 
 
 ;; Start in the shell, in a single, full-frame window.
 ;; Name buffer *unix* rather than *shell* because it's easier to complete.
@@ -273,5 +275,3 @@ See `set-preferences' and `get-preference'.")
 
 
 ;;; dot-emacs.el ends here
-
-

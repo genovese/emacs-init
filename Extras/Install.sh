@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Default option values
 use_cask=''

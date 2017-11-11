@@ -1,6 +1,7 @@
 ;;; -*- mode: emacs-lisp; lexical-binding: t; -*-
 
 (set-preferences
+ 'user-full-name      "Christopher R. Genovese"
  'user-home-page      "http://www.stat.cmu.edu/~genovese?p=daily"
  'user-email-address  "genovese@cmu.edu"
  'shell-command       "/bin/zsh"

@@ -48,7 +48,11 @@ users's environment, so items like PATH are mis-set.")
 
 (defvar user-home-page (get-preference 'user-home-page))
 
-(defvar user-email-address (get-preference 'user-email-address))
+;; user-mail-address set automatically by Emacs; override from preferences
+(defvar user-email-address (get-preference 'user-email-address user-mail-address))
+(setq user-mail-address user-email-address) 
 
+;; user-full-name set automatically by Emacs; override from preferences
+(setq user-full-name (get-preference 'user-full-name user-full-name))
 
 ;;; user-system.el ends here
