@@ -294,22 +294,19 @@
 
 (with-eval-after-load 'help
   (bind-keys :map help-map
-    ("C-c" . describe-key-briefly)
-    ("M-c" . describe-copying)
-    ("E"   . view-emacs-FAQ)
-    ("f"   . counsel-describe-function)
-    ("F"   . counsel-describe-face)
-    ("C-f" . counsel-describe-face)
-    ("I"   . Info-goto-emacs-command-node) ; for help-mode consistency
-    ("M-i" . describe-input-method) ; not often needed
-    ("T"   . describe-text-properties) 
-    ("B"   . helm-descbinds) ; requires package helm-descbinds
-    ("M-b" . counsel-descbinds)
-    ;("C-v" . scroll-help-window-forward)
-    ;("C-w" . scroll-help-window-backward)
-    ;("M-v" . end-of-help-buffer)
-    ;("M-w" . beginning-of-help-buffer)
-    ("g"   . my/help-goto-help))
+    ("C-c"   . describe-key-briefly)
+    ("M-c"   . describe-copying)
+    ("E"     . view-emacs-FAQ)
+    ("f"     . counsel-describe-function)
+    ("F"     . counsel-describe-face)
+    ("C-f"   . counsel-describe-face)
+    ("I"     . Info-goto-emacs-command-node) ; for help-mode consistency
+    ("M-i"   . describe-input-method) ; not often needed
+    ("T"     . describe-text-properties) 
+    ("B"     . helm-descbinds) ; requires package helm-descbinds
+    ("M-b"   . counsel-descbinds)
+    ("C-M-p" . counsel-find-library)
+    ("g"     . my/help-goto-help))
 
   (my/define-remote-help-command
    "Move forward to the next help button, or the nth next with prefix arg."

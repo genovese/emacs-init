@@ -1,12 +1,30 @@
 ;;; paredit.el -- paredit customizations -*- lexical-binding: t; -*-
 
-; ATTN: paredit makes it somewhat painful to make substantial changes
-; in the key commands, with all the examples and documentation intact.
-; This config uses my adjusted settings (changes marked with CRG)
-; and resets the entire keymap and annotations.
+(defun paredit-reset-commands (&optional commands)
+  "Reset paredit command keys and annotation with examples and documentation.
+If COMMANDS is not nil, `paredit-commands' is reset to COMMANDS
+before redefining the key map. In this case, COMMANDS should have
+the format as documented in `paredit-commands'. This command respects
+`minor-mode-map-alist' and so can be called before or after loading
+paredit.
+
+   Note: This is needed because paredit makes it somewhat painful
+to substantially change its key commands. Specifically,
+`paredit-commands' is set with `setq' so simply resetting
+`paredit-commands' and calling `paredit-define-keys' does not
+eliminate the default settings. The solution is to clear out
+`paredit-mode-map', but it cannot be just redefined because it is
+linked into `minor-mode-map-alist'."
+  (when commands
+    (setq paredit-commands commands))
+  (setcdr paredit-mode-map nil) ;; reset also in minor-mode-map-alist
+  (paredit-define-keys)
+  (paredit-annotate-mode-with-examples)
+  (paredit-annotate-functions-with-examples))
+
 (use-package paredit  
   :init
-  (setq my/paredit-commands
+  (setq my/paredit-commands ;; changes from default marked with ;CRG
         `("Basic Insertion Commands"
           ("("         paredit-open-round
            ("(a b |c d)"
@@ -198,16 +216,11 @@
             "hello-|world"))
           (("M-i RET" "C-c C-M-l") paredit-recenter-on-sexp) ; CRG -- added mine
           ("M-q"       paredit-reindent-defun)))
-  :config (progn      
+  :config (progn
+            (paredit-reset-commands my/paredit-commands)
             (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode t)
             (add-hook 'lisp-mode-hook #'enable-paredit-mode t)
-            (add-hook 'clojure-mode-hook #'enable-paredit-mode)
-            (define-prefix-command 'paredit-sexp-map) 
-            (define-key paredit-mode-map [(meta ?i)] 'paredit-sexp-map)
-            (define-key paredit-mode-map [(meta ??)] nil)
-            (setq paredit-commands my/paredit-commands)
-            (paredit-define-keys)
-            (paredit-annotate-mode-with-examples)))
+            (add-hook 'clojure-mode-hook #'enable-paredit-mode)))
 
 
 ;;; paredit.el ends here

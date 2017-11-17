@@ -1,5 +1,36 @@
 ;;; completion.el -- completion tools -*- lexical-binding: t; -*-
 
+;; Additional completion commands and tools
+
+(defun ivy-yank-action (x)
+  (kill-new x))
+
+(defun counsel-find-file-read-only (&optional initial-input)
+  "Forward to `find-file-read-only'.
+When INITIAL-INPUT is non-nil, use it in the minibuffer during completion."
+  (interactive)
+  (ivy-read "Find file: " 'read-file-name-internal
+            :matcher #'counsel--find-file-matcher
+            :initial-input initial-input
+            :action
+            (lambda (x)
+              (with-ivy-window
+                (if (and counsel-find-file-speedup-remote
+                         (file-remote-p ivy--directory))
+                    (let ((find-file-hook nil))
+                      (find-file-read-only (expand-file-name x ivy--directory)))
+                  (find-file-read-only (expand-file-name x ivy--directory)))))
+            :preselect (when counsel-find-file-at-point
+                         (require 'ffap)
+                         (let ((f (ffap-guesser)))
+                           (when f (expand-file-name f))))
+            :require-match 'confirm-after-completion
+            :history 'file-name-history
+            :keymap counsel-find-file-map
+            :caller 'counsel-find-file-read-only))
+
+;; Completion packages
+
 (use-package company
   :config (progn
             (bind-key [(control ?\')] 'company-complete)
