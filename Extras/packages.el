@@ -110,30 +110,41 @@ PACKAGE-LIST is a list of symbols"
          (funcall failure "**Error**" " installing package" package
                   (concat ": " (cadr e)))
          (setq error-cnt (1+ error-cnt)))))
-    (funcall log "\nPackage installation complete"
-             (format "(%d/%d successful)." cnt (+ cnt error-cnt)))
+    (funcall log (format "\nInstalled %d packages in %s" cnt package-user-dir)
+             (format "with %d error%s (%d/%d successful)."
+                     error-cnt (if (= error-cnt 1) "" "s")
+                     cnt (+ cnt error-cnt)))
     (unless no-log ; finalize log buffer
       (with-current-buffer log-buf
-        (goto-char (point-min))
-        (insert (format "Installed %d packages with %d error%s."
-                        cnt error-cnt (if (= error-cnt 1) "" "s")))
         (view-mode 1)
         (setq buffer-read-only t
               view-exit-action #'kill-buffer)
-        (goto-char (point-min)))
+        (goto-char (point-max))
+        (beginning-of-line))
       (unless hidden-log
         (set-window-buffer nil log-buf t)))))
 
 
 ;;; Script Entry Point
 
-(defun install-init-packages (&optional cask-file)
+(defun install-init-packages (&optional install-dir cask-file)
   "Install packages specified in CASK-FILE, with priority packages
 from `init/priority-packages' put first."
   (interactive)
   (setq package-enable-at-startup t
-        package-archives          init/package-archives)
-  (thread-first (or "init/Extras/Cask" cask-file)
+        package-archives          init/package-archives
+        package-user-dir          (or install-dir
+                                      (thread-first "elpa"
+                                        expand-file-name
+                                        abbreviate-file-name
+                                        directory-file-name)))
+  (thread-first (or cask-file
+                    (let (file)
+                      (and install-dir
+                           (file-readable-p
+                            (setq file (expand-file-name "../Cask" install-dir)))
+                           cfile))
+                     "init/Extras/Cask")
     (init/packages-from-cask)
     (init/promote-priority-packages init/priority-packages)
     (init/install-packages noninteractive)))
