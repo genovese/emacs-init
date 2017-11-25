@@ -133,7 +133,7 @@
       a. Install code, extras, and packages:
 
          #+begin_src sh
-           sh Extras/Install.sh --full
+           bash Extras/Install.sh --full
          #+end_src
 
          which will install the base code and all extras,
@@ -146,7 +146,7 @@
       b. Install everything but do not overwrite target files:
 
          #+begin_src sh
-           sh Extras/Install.sh --full --safe
+           bash Extras/Install.sh --full --safe
          #+end_src
 
          which will install the base and extras but will
@@ -156,7 +156,7 @@
       c. Install only the base code:
 
          #+begin_src sh
-           sh Extras/Install.sh --minimal
+           bash Extras/Install.sh --minimal
          #+end_src
 
       d. When installing emacs packages with =--install= or =--full=,
@@ -166,7 +166,7 @@
 
          For instance:
          #+begin_src sh
-           sh Extras/Install.sh --full --package=package
+           bash Extras/Install.sh --full --package=package
          #+end_src
          will use emacs's package system. Other settings
          are =cask= and =cask-homebrew,= if the cask tool
@@ -178,7 +178,7 @@
       
       For more details and options, run the script with
       #+begin_src sh
-        sh Extras/Install.sh --help
+        bash Extras/Install.sh --help
       #+end_src
 
    6. The script evokes an application (within emacs of course)
@@ -231,7 +231,7 @@
       a. Install code, extras, and packages:
 
          #+begin_src sh
-           sh Extras/Install.sh --target=~/.emacs.d --full
+           bash Extras/Install.sh --target=~/.emacs.d --full
          #+end_src
          which will install the base code and all extras,
          including overwriting =../emacs-custom.el= and
@@ -243,7 +243,7 @@
       b. Install everything but do not overwrite target files:
 
          #+begin_src sh
-           sh Extras/Install.sh --target=~/.emacs.d --full --safe
+           bash Extras/Install.sh --target=~/.emacs.d --full --safe
          #+end_src
          which will install the base and extras but will
          not overwrite the =../Cask=, =../emacs-custom.el=, or
@@ -252,7 +252,7 @@
       c. Install only the base code:
 
          #+begin_src sh
-           sh Extras/Install.sh --target=~/.emacs. --minimal
+           bash Extras/Install.sh --target=~/.emacs. --minimal
          #+end_src
 
       d. When installing emacs packages with =--install= or =--full=,
@@ -262,7 +262,7 @@
 
          For instance:
          #+begin_src sh
-           sh Extras/Install.sh --full --package=package
+           bash Extras/Install.sh --full --package=package
          #+end_src
          will use emacs's package system. Other settings
          are =cask= and =cask-homebrew,= if the cask tool
@@ -274,7 +274,7 @@
       
       For more details and options, run the script with
       #+begin_src sh
-        sh Extras/Install.sh --help
+        bash Extras/Install.sh --help
       #+end_src
 
    4. The script evokes an application (within emacs of course)
