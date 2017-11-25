@@ -28,6 +28,7 @@ package_label='auto'
 package_out=''
 use_homebrew=''
 no_init=''
+no_backup=''
 no_extras=''
 with_custom=''
 with_env=''
@@ -39,10 +40,12 @@ verbose=''
 brew_x=''
 cask_x=''
 emacs_x=''         # use  tr '[:upper:]' '[:lower:]' if tr available
-platform=`uname -s | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
+platform=$(uname -s | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/')
 no_review=''
 emacs_version=0
 found_exes=''
+tmp_myenv=''
+tmp_emacs=''
 
 
 usage () {
@@ -63,7 +66,9 @@ usage () {
     echo "                  The file is always created if it does not exist."
     echo "  --with-env      Copy my-env.el from Extras. User's PATH is personalized"
     echo "                  during installation. (Mac OS X only unless given twice.)"
-    echo "  --no-home       Do not install $HOME/.emacs.el."
+    echo "  --no-home       Do not install $HOME/.emacs(.el)."
+    echo "  --no-backup     Do not backup $HOME/.emacs(.el) during install"
+    echo "                  (ignored and irrelevant if --no-home is supplied)."
     echo "  --no-extras     Do not install extra files (Cask, themes, site-lisp)."
     echo "  --minimal       Install base code only, no extras or packages."
     echo "                  Sets --no-init and --no-extras, overriding --with-custom,"
@@ -81,7 +86,7 @@ usage () {
 }    
 
 find_cask () {
-    cask_x=`command -v cask`
+    cask_x=$(command -v cask)
     if [[ -n "$cask_x" ]]; then
         return 0
     fi
@@ -93,7 +98,7 @@ find_homebrew () {
         return 1
     fi
 
-    brew_x=`command -v brew`
+    brew_x=$(command -v brew)
     if [[ -n "$brew_x" ]] && ! $brew_x --version | grep -q '^Homebrew'; then
         brew_x=''
         return 1
@@ -103,7 +108,7 @@ find_homebrew () {
 
 is_emacs_supported() {
     if [[ -n "$emacs_x" && -x "$emacs_x" ]]; then
-        emacs_version=`$emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+)\..*$/\1/;2,$d'`
+        emacs_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+)\..*$/\1/;2,$d')
         if (( $emacs_version > $min_emacs_version )); then
             return 0
         else
@@ -126,14 +131,15 @@ find_emacs () {
         fi
     fi
 
+    cv_emacs=$(command -v emacs)
     if [[ "$platform" == "darwin" ]]; then
         if [[ -n "$use_homebrew" ]]; then
-            emacs_exes=( "${brew_emacs[@]}" "${app_emacs[@]}" `command -v emacs` )
+            emacs_exes=( "${brew_emacs[@]}" "${app_emacs[@]}" "$cv_emacs" )
         else
-            emacs_exes=( "${app_emacs[@]}" "${brew_emacs[@]}" `command -v emacs` )
+            emacs_exes=( "${app_emacs[@]}" "${brew_emacs[@]}" "$cv_emacs" )
         fi    
     else
-        emacs_exes=( `command -v emacs` "${alt_emacs[@]}" )
+        emacs_exes=( "$cv_emacs" "${alt_emacs[@]}" )
     fi
 
     for ee in "${emacs_exes[@]}"
@@ -162,11 +168,11 @@ find_executables () {
     find_homebrew
     if ! find_emacs; then
         if [[ -n "$do_install" ]]; then
-            echo "ERROR: cannot find suitable version of emacs, no files installed"
-            echo "       Try specifying --emacs=PATH for emacs version >= $min_emacs_version ($min_emacs_preferred preferred)"
+            echo "$0 ERROR: cannot find suitable version of emacs, no files installed"
+            echo "  Try specifying --emacs=PATH for emacs version >= $min_emacs_version ($min_emacs_preferred preferred)"
             exit 1
         else
-            echo "WARNING: cannot find suitable versino of emacs; cannot perform data review step."
+            echo "$0 WARNING: cannot find suitable versino of emacs; cannot perform data review step."
             no_review='true'
         fi
     fi
@@ -223,6 +229,9 @@ while [ "$1" != "" ]; do
         --no-home)
             no_init='true'
             ;;
+        --no-backup)
+            no_backup='true'
+            ;;
         --no-extras)
             no_extras='true'
             ;;
@@ -251,8 +260,8 @@ while [ "$1" != "" ]; do
             dry_run='true'
             ;;
         *)
-            param=`echo $1 | sed 's/=.*$//'`
-            value=`echo $1 | sed 's/^[^=]*=//'`
+            param=$(echo $1 | sed 's/=.*$//')
+            value=$(echo $1 | sed 's/^[^=]*=//')
             case $param in
                 --target)
                     target="$value"
@@ -267,7 +276,7 @@ while [ "$1" != "" ]; do
                             package_out="((package-system :$value))"
                             ;;
                         *)
-                            echo "ERROR: --package value should be package, cask, cask-homebrew, or auto"
+                            echo "$0 ERROR: --package value should be package, cask, cask-homebrew, or auto"
                             echo ""
                             usage
                             exit
@@ -275,7 +284,7 @@ while [ "$1" != "" ]; do
                     esac
                     ;;
                 *)
-                    echo "ERROR: unknown parameter \"$param\""
+                    echo "$0 ERROR: unknown parameter \"$param\""
                     echo ""
                     usage
                     exit 1
@@ -287,15 +296,33 @@ done
 
 # Need target as absolute path for the home init file
 if [[ -z "$no_init" ]]; then
-  abs_target=`cd "$target"; pwd`
+  abs_target=$(cd "$target"; pwd)
 fi
 
 # Recursive copies
-copy=`command -v rsync`
+copy=$(command -v rsync)
 if [[ -z "$copy" ]]; then
   copy='cp -R $safe'
 else
   copy="$copy -a ${safe:+ --ignore-existing}"
+fi
+
+# Temporary files for --safe processing, portably
+if [[ -n "$safe" ]]; then
+    if [[ -n "$(command -v mktemp)" ]]; then
+        tmp_myenv=$(mktemp)
+        tmp_emacs=$(mktemp)
+    elif [[ -d ${TMPDIR:-/tmp/} ]]; then
+        tmp_myenv=${TMPDIR:-/tmp/}my-env.el
+        tmp_emacs=${TMPDIR:-/tmp/}.emacs.el
+    else
+         echo "$0 ERROR: cannot create temporary files;"
+         echo "  try evoking *without* the --safe flag."
+         exit 1
+    fi
+else
+    tmp_myenv=$target/my-env.el
+    tmp_emacs=$HOME/.emacs.el
 fi
 
 # Scan environment
@@ -315,15 +342,19 @@ if [[ -n "$dry_run" || -n "$verbose" ]]; then
     [[ -n "$with_custom" ]] && echo "cp $safe Extras/emacs-custom.el $target"
     [[ -z "$with_custom" && ! -e $target/emacs-custom.el ]] && echo "echo '' > $target/emacs-custom.el"
     if [[ "$with_env" == "force" || ( -n "$with_env" && "$platform" == "darwin" ) ]]; then
-        echo 'cat Extras/my-env.el | sed -E "s|\(setenv \"PATH\" \"[^\"]+\" *\)|(setenv \"PATH\" \"$PATH\")|" > /tmp/my-env.el'
-        echo "cp $safe /tmp/my-env.el $target"
+        echo 'cat Extras/my-env.el | sed -E "s|\(setenv \"PATH\" \"[^\"]+\" *\)|(setenv \"PATH\" \"$PATH\")|" >' "$tmp_myenv"
+        [[ -n "$safe" ]] && echo "cp $safe $tmp_myenv $target/my-env.el"
     fi
     if [[ -z "$no_init" ]]; then
-        if [[ "$package_in" == "$package_out" ]]; then
-            echo "cat Extras/home-dot-emacs.el | sed 's:TARGET:$abs_target:' > $HOME/.emacs.el"
-        else
-            echo "cat Extras/home-dot-emacs.el | sed 's/$package_in/$package_out/;s:TARGET:$abs_target:' > $HOME/.emacs.el"
+        if [[ -z "$no_backup" && -e "$HOME/.emacs.el" ]]; then
+            echo "cp $safe $HOME/.emacs.el $HOME/.emacs.el.backup"
         fi
+        if [[ "$package_in" == "$package_out" ]]; then
+            echo "cat Extras/home-dot-emacs.el | sed 's:TARGET:$abs_target:' > $tmp_emacs"
+        else
+            echo "cat Extras/home-dot-emacs.el | sed 's/$package_in/$package_out/;s:TARGET:$abs_target:' > $tmp_emacs"
+        fi
+        [[ -n "$safe" ]] && echo "cp $safe $tmp_emacs $HOME/.emacs.el"
     fi
 fi
 
@@ -340,15 +371,19 @@ if [[ -z "$dry_run" ]]; then
     [[ -n "$with_custom" ]] && cp $safe Extras/emacs-custom.el $target
     [[ -z "$with_custom" && ! -e $target/emacs-custom.el ]] && echo '' > $target/emacs-custom.el
     if [[ "$with_env" == "force" || ( -n "$with_env" && "$platform" == "darwin" ) ]]; then
-        cat Extras/my-env.el | sed -E "s|\(setenv \"PATH\" \"[^\"]+\" *\)|(setenv \"PATH\" \"$PATH\")|" > /tmp/my-env.el
-        cp $safe /tmp/my-env.el $target
+        cat Extras/my-env.el | sed -E "s|\(setenv \"PATH\" \"[^\"]+\" *\)|(setenv \"PATH\" \"$PATH\")|" > $tmp_myenv
+        [[ -n "$safe" ]] && cp $safe $tmp_myenv $target/my-env.el
     fi
     if [[ -z "$no_init" ]]; then
-        if [[ "$package_in" = "$package_out" ]]; then
-            cat Extras/home-dot-emacs.el | sed "s:TARGET:$abs_target:" > $HOME/.emacs.el
-        else
-            cat Extras/home-dot-emacs.el | sed "s/$package_in/$package_out/;s:TARGET:$abs_target:" > $HOME/.emacs.el
+        if [[ -z "$no_backup" && -e "$HOME/.emacs.el" ]]; then
+            cp $safe $HOME/.emacs.el $HOME/.emacs.el.backup
         fi
+        if [[ "$package_in" = "$package_out" ]]; then
+            cat Extras/home-dot-emacs.el | sed "s:TARGET:$abs_target:" > $tmp_emacs
+        else
+            cat Extras/home-dot-emacs.el | sed "s/$package_in/$package_out/;s:TARGET:$abs_target:" > $tmp_emacs
+        fi
+        [[ -n "$safe" ]] && cp $safe $tmp_emacs $HOME/.emacs.el
     fi
 fi  
 
@@ -369,7 +404,7 @@ if [[ -n "$do_install" ]]; then
             (cd $target; $cask_x install $verbose)
         fi
     else
-        echo "ERROR: cannot install packages with type $package_label and cask $cask_x."
+        echo "$0 ERROR: cannot install packages with type $package_label and cask $cask_x."
     fi
 fi
 
@@ -390,10 +425,10 @@ fi
 
 # Wrap up messaging
 echo ""
-echo "Emacs initialization installed in $target with emacs $emacs_x."
+echo "Emacs initialization now installed in $target with emacs $emacs_x."
 echo "Configuration:"
-echo "  package $package_label, install? ${do_install:-false}, homebrew? ${use_homebrew:-false},"
-echo "  custom? ${with_custom:-false}, env? ${with_env:-false}, no home? ${no_init:-false}, no extras? ${no_extras:-false},"
-echo "  with options ${safe:+safe copying, }${verbose:+verbose, }${dry_run:+dry run } set."
+echo "  package type: $package_label, install? ${do_install:-false}, homebrew preferred? ${use_homebrew:-false},"
+echo "  with custom? ${with_custom:-false}, with env? ${with_env:-false}, no home? ${no_init:-false}, no extras? ${no_extras:-false},"
+echo "  with the following options set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run}."
 echo "Next: Start up emacs and get editing..."
 

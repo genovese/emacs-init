@@ -3,5 +3,157 @@
 Review features of this init-file configuration below, and 
 when finished, type 'q' to exit.
 
-* Keys
+* Special Keybindings
+** Help
+
+  Default emacs keybindings reserve =C-h= for help. While
+  help is important and commonly used, it does not
+  need a top-level (control) key. Instead, we do the
+  following:
+
+  + =C-h= -- =delete-backward-char=
+  + =M-h= -- =backward-kill-word=
+  + =M-C-h= -- help
+
+  This is much more efficient than the defaults (no more need for
+  backspace and =backward-kill-word= is very commonly useful). The main
+  complication is that most modes (and to some extend emacs itself,
+  see =help-char=) assume =C-h= for help, which requires additional
+  effort to configure.
+
+  After evoking help (with =M-C-h=), there are several additional
+  useful keys included in the key map. Type =M-C-h= and wait
+  1.5 seconds to see them (with which-key-mode, which is set
+  by default).
+
+  A few notable choices:
+
+  + =F= -- describe a face, with completion
+  + =B= and =M-b= -- show keybindings with completion by two separate methods.
+  + =M-C-p= -- Find an emacs package with completion
+  + =i= -- open up emacs info manuals for detailed help
+  
+** Scrolling and Cutting
+
+  Also in the default keybindings use =C-v= and =M-v= for scrolling up and
+  down. This cuts across levels (control to meta) for a
+  comparable-level operation and is slow, as a result. It also
+  leaves =C-w=, non-mnemonically, for a kill operation. Instead,
+  the keybindings here do the following:
+
+  + =C-w= -- scroll down
+  + =C-v= -- scroll up
+  + =M-w= -- beginning of buffer
+  + =M-v= -- end of buffer
+  + =M-C-w= -- scroll down other window
+  + =M-C-v= -- scroll up other window
+  + =C-k= -- kill line
+  + =M-k= -- kill region
+  + =M-C-k= -- kill sexp
+
+  Again, this requires some remapping in configuring some common
+  modes.
+
+  For speed-ups, the basic cursor movement commands have a shifted
+  version that goes five times as fast: =S-C-n=, =S-C-p=, =S-C-f=, =S-C-b=. 
+
+  In addition, 'pages' are defined here so that two blank lines
+  (or a formfeed) mark a page. Use =C-x [= and =C-x ]= to navigate
+  by pages. This is particularly useful in source code, using
+  double blank lines to demarcate sections that can easily
+  be navigated.
+
+** Searching, Special Movement, and Transposition
+
+   Several key-chords are prefix keys for menus of useful functions.
+   Try typing each chord and wait 1.5 seconds; which-key-mode will
+   show you the choices.
+
+   The prefixes are:
+
+   + =C-x space= -- access to emacs plugins for search tools like
+                  ripgrep and ack, finding project files, and
+                  completion-based search tools like helm and swiper.
+                  
+   + =C-x %= -- String search and replacement in a variety of ways
+   + =M-g= -- Special movement and view commands, including moving
+            to lines, columns, compilation errors, shell buffers,
+            magit status buffers, org links, urls, and more.
+   + =M-T= -- transposing objects at various scales from character up.
+   
+** Win-switch
+
+   The ~win-switch~ package offers fast and configurable movement
+   among windows and frames in emacs. The key chord =C-x o= initiates
+   win-switch mode, subsequent commands within a short time window
+   will enable easy movement among windows. The keys i and k
+   move up and down; h and l move left and right, space moves
+   between frames, and u ends win-switch mode (as does waiting).
+
+   For more on use and configuration, you can do =M-C-h P win-switch=
+   and view https://github.com/genovese/win-switch.
+
+** Other Useful commands
+
+   A few useful command bindings are given as follows. For
+   some of these (e.g., Command-<space> on Mac's), you
+   might need to unbind system shortcuts that shadow emacs.
+
+   + =M-space= -- Marks a balanced 'expression' (=mark-sexp=), very useful!
+   + =M-C-space= -- Marks an entire function definition (=mark-defun=)
+   + =C-=== -- Marks an expanding region on successive uses (=expand-region=)
+   + =C-c C-return= -- begin rectangle editing (awesome!) (=cua-set-rectangle-mark=)
+   + =M-\= -- delete whitespace in flexible ways, do =C-u M-\= to delete
+            all surrounding whitespace
+   + =C-5= -- Search and replace text with querying (=query-replace=)
+   + =C-6= -- Search and replace regex with querying (=query-replace-regexp=)
+   + =C-7= -- Align region by regular expression (=align-regexp=)  
+   + =C-3= and =C-4= -- begin and end/call a keyboard macro
+   + =C-x *= -- evoke emacs's powerful =calc= facility, try =C-x *q= for
+              quick calculations.
+   + =C-x M-k= -- prefix key for keyboard macro commands. Try it and
+                wait 1.5 seconds to see options.
+
+* Help Navigation
+
+  To make the Emacs help system even easier to use, this adds
+  two mechanisms for navigating. First =C-M-h g= from any buffer
+  moves to the help buffer, where =g= moves back to the previous
+  location. Second, =C-M-h= followed by various navigation commands
+  moves the help buffer without changing the active buffer.
+  These commands are as follows:
+
+  - =C-w=   -- scroll down
+  - =C-v=   -- scroll up
+  - =M-w=   -- go to beginning of buffer
+  - =M-v=   -- go to end of buffer
+  - =C-b=   -- back to previous help page
+  - =C-f=   -- forward to next help page
+  - =RET=   -- push button
+  - =TAB=   -- forward-button
+  - =S-TAB= -- backward-button
+  - =q=     -- quit help
+
+* Server start
+
+  This initialization always starts the emacs-server so
+  you can interact with a running instance using emacsclient.
+
+* Components and Mods
+
+  The =components= directory contains files that each load
+  and configure a cluster of related packages and/or modes.
+
+  The =mods= directory contains mode- or tool-specific modifications and
+  code. These represent structural changes or code that offers
+  new/improved functionality. This includes improved help navigation,
+  directory tracking systems for tcsh and zsh (separately), extensions
+  to dired, and some extra tools for AucTeX and Org. Some of the
+  earlier mods have been spun off into their own packages (e.g.,
+  =win-switch=) or into existing emacs code (e.g., =ibuffer=).
+
+* Zenburn+ Theme
+
+  A modified zenburn theme, zenburn+, is available
+  in =Extras/themes=.
 

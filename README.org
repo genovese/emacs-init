@@ -100,29 +100,35 @@
 
    This is the usual (and recommended) case. Take the following steps.
 
-   1. Clone this repository into a subdirectory of your
-      emacs initialization directory.
+   1. Move to your emacs initialization directory. Replace
+      '=EMACS_D_DIRECTORY'= in the following with the path to that
+      directory:
 
       #+begin_src sh
         cd EMACS_D_DIRECTORY
-        git clone https://github.com/genovese/emacs-init.git
       #+end_src
 
-      Replace =EMACS_D_DIRECTORY= with your emacs initialization
-      directory in the commands above.
-   2. Rename =emacs-init= to =init= in this directory.
+   2. Clone this repository into a subdirectory of your
+      emacs initialization directory. 
+
+      #+begin_src sh
+        git clone https://github.com/genovese/emacs-init.git
+      #+end_src
+      
+   3. Rename =emacs-init= to =init= in this directory.
 
       #+begin_src sh
         mv emacs-init init
       #+end_src
-   3. Change to the =init= directory.
+   4. Change to the =init= directory.
 
       #+begin_src sh
         cd init
       #+end_src
-   4. Run the install script. There is no need to set the =--target=
-      option as it is =..= by default. The script has a variety of
-      options, but the simplest are
+
+   5. Run the install script. There is no need to set the =--target=
+      option as it will be correct (=..)= by default for this case.
+      The script has a variety of options, but the simplest are
 
       a. Install code, extras, and packages:
 
@@ -132,10 +138,11 @@
 
          which will install the base code and all extras,
          including overwriting =../emacs-custom.el= and
-         =.emacs.el= in the home directory. If the 'cask'
-         command is available, this will also use it
-         to install the packages specified in the cask
-         file and will set up emacs to use those packages.
+         =.emacs.el= in the home directory. This will also
+         install the emacs packages needed to use this
+         emacs configuration and will set up emacs to
+         use those packages.
+
       b. Install everything but do not overwrite target files:
 
          #+begin_src sh
@@ -145,20 +152,58 @@
          which will install the base and extras but will
          not overwrite the =../Cask=, =../emacs-custom.el=, or
          =~/.emacs.el= files if they already exist.
+
       c. Install only the base code:
 
          #+begin_src sh
            sh Extras/Install.sh --minimal
          #+end_src
+
+      d. When installing emacs packages with =--install= or =--full=,
+         the script attempts to deduce whether to use emacs's
+         package system or cask. The =--package= option (and also
+         =--homebrew= on Mac OS X) can set this explicitly.
+
+         For instance:
+         #+begin_src sh
+           sh Extras/Install.sh --full --package=package
+         #+end_src
+         will use emacs's package system. Other settings
+         are =cask= and =cask-homebrew,= if the cask tool
+         is installed.
+
+      By including the =--dry-run= flag with any set of other options,
+      you can see what the script will do without it taking any
+      action. The =--verbose= flag can also be helpful here.
+      
       For more details and options, run the script with
       #+begin_src sh
         sh Extras/Install.sh --help
       #+end_src
-   5. Edit the file =data/preferences.el= to reflect your
-      personal settings. The most important settings
-      to change are =user-home-page=, =user-email-address=,
-      and =shell=. Simply edit the strings to the right
-      of those keys.
+
+   6. The script evokes an application (within emacs of course)
+      for personalizing some of the settings and data in
+      this configuration. This includes:
+      
+      + Editing the preferences data in the file =data/preferences.el,=
+        to reflect your personal settings. The most important
+        settings to change are =user-home-page=, =user-email-address=,
+        =shell=, and =theme-function=. Simply edit the values for each
+        key, as instructed in the application.
+
+      + Editing the customization settings in =emacs-custom.el=. The
+        application lists the variables and faces in the custom
+        file, showing the current setting, and giving a button to
+        push to open a customization buffer for that setting. View
+        and change the settings as you like, hitting the 'Apply and
+        Save' button in the respective customization buffers. This
+        will set these values for future emacs sessions.
+
+      + Viewing some tutorial information about the configuration.
+
+      When complete, hit the 'All Done' button, and the Install
+      script will continue.
+
 
 ** Method 2. Keeping this repository separate from an active emacs init directory
 
@@ -190,10 +235,10 @@
          #+end_src
          which will install the base code and all extras,
          including overwriting =../emacs-custom.el= and
-         =.emacs.el= in the home directory. If the 'cask'
-         command is available, this will also use it
-         to install the packages specified in the cask
-         file and will set up emacs to use those packages.
+         =.emacs.el= in the home directory. This will also
+         install the emacs packages needed to use this
+         emacs configuration and will set up emacs to
+         use those packages.
 
       b. Install everything but do not overwrite target files:
 
@@ -210,16 +255,50 @@
            sh Extras/Install.sh --target=~/.emacs. --minimal
          #+end_src
 
+      d. When installing emacs packages with =--install= or =--full=,
+         the script attempts to deduce whether to use emacs's
+         package system or cask. The =--package= option (and also
+         =--homebrew= on Mac OS X) can set this explicitly.
+
+         For instance:
+         #+begin_src sh
+           sh Extras/Install.sh --full --package=package
+         #+end_src
+         will use emacs's package system. Other settings
+         are =cask= and =cask-homebrew,= if the cask tool
+         is installed.
+
+      By including the =--dry-run= flag with any set of other options,
+      you can see what the script will do without it taking any
+      action. The =--verbose= flag can also be helpful here.
+      
       For more details and options, run the script with
       #+begin_src sh
         sh Extras/Install.sh --help
       #+end_src
 
-   4. Edit the file =data/preferences.el= to reflect your personal
-      settings. The most important settings to change are
-      =user-home-page=, =user-email-address=, =shell-command=, and
-      =theme-function=. Simply edit the strings to the right of those
-      keys.
+   4. The script evokes an application (within emacs of course)
+      for personalizing some of the settings and data in
+      this configuration. This includes:
+      
+      + Editing the preferences data in the file =data/preferences.el,=
+        to reflect your personal settings. The most important settings
+        to change are =user-home-page=, =user-email-address=,
+        and =shell=. Simply edit the values for each key, as instructed
+        in the application.
+
+      + Editing the customization settings in =emacs-custom.el=. The
+        application lists the variables and faces in the custom
+        file, showing the current setting, and giving a button to
+        push to open a customization buffer for that setting. View
+        and change the settings as you like, hitting the 'Apply and
+        Save' button in the respective customization buffers. This
+        will set these values for future emacs sessions.
+
+      + Viewing some tutorial information about the configuration.
+
+      When complete, hit the 'All Done' button, and the Install
+      script will continue.
 
    In this case, note that the shell script =Extras/Update.sh= allows
    for simple updating of the Extras files (e.g., =Cask=) from the
@@ -241,32 +320,48 @@
       from this site-lisp directory there.
    5. If =$TARGET/themes= does not exist create it and copy files
       from this themes directory there.
-   7. If =--cask= is given and cask is installed, move to $TARGET
-      directory temporarily and do cask install.
+   7. If =--install= is given, move to $TARGET directory temporarily
+      and install the packages, either with the included tool (that
+      uses emacs's package.el facility) or with the =cask= package
+      manager.
 
    If --package is not supplied, the script will attempt to auto-deduce
-   it, which is of particular note if --cask is also supplied.
+   it based on your system, on whether it can find the =cask= tool, and
+   on whether the =--homebrew= option is supplied.
 
 * File Manifest
 
-  | File or Directory        | Description/Notes                                                    |
-  |--------------------------+----------------------------------------------------------------------|
-  | dot-emacs.el             | Main entry point                                                     |
-  | crg-macros.el            | Utility macros used in the configuration                             |
-  | crg-ops.el               | A few user-level operational functions                               |
-  | crg-utils.el             | A small collection of elisp utilities                                |
-  | crg-themes.el            | Configuration and utilities for custom themes                        |
-  | data                     | Directory containing preferences and other user-level data           |
-  | mods                     | Directory containing mode- or tool-specific modifications            |
-  | prototypes               | Experimental or pre-packaged code                                    |
-  | Extras                   | Directory with supplementary files to be installed in target or home |
-  | Extras/Install.sh        | Installation shell script (use --help for details)                   |
-  | Extras/Update.sh         | Shell script to update Extras from target when repo stored elsewhere |
-  | Extras/Cask              | Current, though non-minimal, Cask file                               |
-  | Extras/themes            | Current custom themes                                                |
-  | Extras/site-lisp         | Current extra elisp                                                  |
-  | Extras/home-dot-emacs.el | Init file for home directory that loads packages and this code       |
-  | Extras/emacs-custom.el   | My current emacs-custom.el, read during config.                      |
-  | Extras/my-env.el         | My current environment settings, use --with-env to install this      |
-  | README.org               | This file                                                            |
-  |--------------------------+----------------------------------------------------------------------|
+  | File or Directory        | Description/Notes                                                       |
+  |--------------------------+-------------------------------------------------------------------------|
+  | dot-emacs.el             | Main entry point                                                        |
+  | macros.el                | Utility macros used in the configuration                                |
+  | ops.el                   | A few user-level operational functions                                  |
+  | utils.el                 | A small collection of elisp utilities                                   |
+  | theme-support.el         | Configuration and utilities for custom themes                           |
+  | keybindings.el           | Keybindings                                                             |
+  | translations.el          | Keyboard translations and mouse emulation                               |
+  | frames.el                | Commands and tools for manipulating frames                              |
+  | hooks.el                 | Hook settings for built-in commands/tools                               |
+  | data                     | Directory containing preferences and other user-level data              |
+  | data/preferences.el      | User preferences data used throughout the configuration                 |
+  | data/user-system.el      | User, platform, and system level constants                              |
+  | components               | Directory containing code to configure various emacs tools and packages |
+  | components/*.el          | Individual component loaders and configurations                         |
+  | mods                     | Directory containing mode- or tool-specific modifications               |
+  | mods/*.el                | Code for individual mods, arranged by tool                              |
+  | prototypes               | Experimental or pre-packaged code                                       |
+  | prototypes/*.el          | Individual prototype modules (give file name '-' prefix to disable)     |
+  | Extras                   | Directory with supplementary files to be installed in target or home    |
+  | Extras/Install.sh        | Installation shell script (use --help for details)                      |
+  | Extras/Update.sh         | Shell script to update Extras from target when repo stored elsewhere    |
+  | Extras/Cask              | Current, though non-minimal, Cask file                                  |
+  | Extras/themes            | Current custom themes                                                   |
+  | Extras/site-lisp         | Current extra elisp                                                     |
+  | Extras/home-dot-emacs.el | Init file for home directory that loads packages and this code          |
+  | Extras/emacs-custom.el   | My current emacs-custom.el, read during config.                         |
+  | Extras/my-env.el         | My current environment settings, use --with-env to install this         |
+  | Extras/packages.el       | Package installer tool for emacs, used during Install script            |
+  | Extras/review.el         | Application for personalizing configuration, used during Install script |
+  | Extras/tutorial.org      | Tutorial document, used during Install script                           |
+  | README.org               | This file                                                               |
+  |--------------------------+-------------------------------------------------------------------------|

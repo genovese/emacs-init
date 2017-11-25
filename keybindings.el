@@ -260,8 +260,6 @@
 ;; Basic Functions
 (global-set-key "\C-x\C-m"    'execute-extended-command)
 (global-set-key "\C-c\C-m"    'execute-extended-command)
-(global-set-key "\C-x\M-m"  'lacarte-execute-command)
-(global-set-key "\C-c\M-m"  'lacarte-execute-command)
 (global-set-key [?\C-0]       'digit-argument) 
 (global-set-key "\C-x\C-d"    'dired)
 (global-set-key "\C-x4\C-d"   'dired-other-window)
@@ -476,8 +474,6 @@
 (global-set-key "\C-cl"       'my-links-prefix)
 (global-set-key "\C-co"       'my-org-prefix)
 (global-set-key "\C-x\M-\C-o" 'icicle-switch-to/from-minibuffer)
-(global-set-key [?\e ?\M-x]   'lacarte-execute-command)
-(global-set-key [?\M-`]       'lacarte-execute-command)
 
 
 ;;; keybindings.el ends here

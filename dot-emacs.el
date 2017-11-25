@@ -268,7 +268,7 @@ See `set-preferences' and `get-preference'.")
 ;; Load current prototype code
 (dolist (proto (directory-files
                 (locate-user-emacs-file "init/prototypes") t "\\.el\\'"))
-  (when (file-exists-p proto)
+  (when (and (file-exists-p proto) (not (string-match-p "^-" proto)))
     (load-file proto)))
 
 ;; Allow access through emacsclient
