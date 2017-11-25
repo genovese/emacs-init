@@ -121,6 +121,7 @@
 (define-key my/go-map "p"      'previous-error)
 (define-key my/go-map "\M-p"   'previous-error)
 (define-key my/go-map "q"      'keyboard-quit)  
+(define-key my/go-map "r"      'magit-list-repositories)
 (define-key my/go-map "Q"      'keyboard-escape-quit)  
 (define-key my/go-map "s"      'counsel-switch-to-shell-buffer)
 (define-key my/go-map "t"      'top-level)

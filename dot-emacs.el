@@ -55,7 +55,7 @@ See `set-preferences' and `get-preference'.")
 
 (defmacro set-preferences (&rest kv-pairs)
   "Add one or more preferences given as successive keys and values."
-  (declare (indent 1))
+  (declare (indent 0))
   (let ((x (cl-gensym)))
     `(cl-loop for ,x = (list ,@kv-pairs) then (cddr ,x)
               while ,x do
@@ -117,7 +117,8 @@ See `set-preferences' and `get-preference'.")
               case-fold-search       nil
               indent-tabs-mode       nil
               shift-select-mode      nil
-              next-line-add-newlines nil)
+              next-line-add-newlines nil
+              truncate-lines         t)
 
 (foreach (s '(tool-bar-mode scroll-bar-mode tooltip-mode delete-selection-mode))
   (if (fboundp s) (funcall s -1))) ; disable some operational modes
