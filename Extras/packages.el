@@ -130,6 +130,7 @@ PACKAGE-LIST is a list of symbols"
 (defun install-init-packages (&optional cask-file)
   "Install packages specified in CASK-FILE, with priority packages
 from `init/priority-packages' put first."
+  (interactive)
   (setq package-enable-at-startup t
         package-archives          init/package-archives)
   (thread-first (or "init/Extras/Cask" cask-file)

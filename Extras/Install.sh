@@ -391,10 +391,10 @@ fi
 if [[ -n "$do_install" ]]; then
     if [[ "$package_label" == "package" && -n "$emacs_x" ]]; then
         if [[ -n "$dry_run" || -n "$verbose" ]]; then
-            echo "(cd $target; $emacs_x --batch -Q --load init/Extras/loader.el --funcall install-init-packages)"
+            echo "(cd $target; $emacs_x --batch -Q --load init/Extras/packages.el --funcall install-init-packages)"
         fi
         if [[ -z "$dry_run" ]]; then
-            (cd $target; $emacs_x --batch -Q --load init/Extras/loader.el --funcall install-init-packages)
+            (cd $target; $emacs_x --batch -Q --load init/Extras/packages.el --funcall install-init-packages)
         fi
     elif [[ -n "$cask_x" ]]; then
         if [[ -n "$dry_run" || -n "$verbose" ]]; then
