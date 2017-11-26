@@ -23,15 +23,18 @@ alt_emacs=( ~/bin/emacs /usr/local/bin/emacs )
 # default option values
 target=".."
 emacs_bin=''
-do_install=''
 package_label='auto'
 package_out=''
 use_homebrew=''
+no_install=''
 no_init=''
 no_backup=''
 no_extras=''
-with_custom=''
-with_env=''
+no_custom=''
+no_env=''
+force_custom=''
+force_env=''
+force_review=''
 safe=''
 dry_run=''
 verbose=''
@@ -39,14 +42,14 @@ verbose=''
 # additional state
 brew_x=''
 cask_x=''
-emacs_x=''         # use  tr '[:upper:]' '[:lower:]' if tr available
+emacs_x=''          # vvv use  tr '[:upper:]' '[:lower:]' if tr available
 platform=$(uname -s | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/')
-no_review=''
 emacs_version=0
 found_exes=''
 tmp_myenv=''
 tmp_emacs=''
-review_type='-no-config' # if packages not installed, adjust review entry point
+no_review=''
+review_type=''
 
 
 usage () {
@@ -57,24 +60,31 @@ usage () {
     echo "Options:"
     echo "  --target=DIR    Use DIR as directory in which to install init subdirectory"
     echo "                  (default: ..)."
+    echo "  --package=TYPE  Emacs package system used to install required emacs packages."
+    echo "                  Value can be: package, cask, cask-homebrew, auto (default: auto)."
+    echo "                  auto attempts to deduce type from cask and homebrew availability."
     echo "  --emacs=PATH    Path to the emacs executable, if otherwise ambiguous or unusual."
     echo "                  Not usually needed, as emacs is auto-detected by default."
-    echo "  --package=TYPE  Emacs package system: package, cask, cask-homebrew, auto."
-    echo "                  auto looks for cask and homebrew to set the type."
-    echo "                  (default: auto)"
-    echo "  --install       Install emacs packages, using method specified in --package."
-    echo "  --with-custom   Copy emacs-custom.el from Extras."
-    echo "                  The file is always created if it does not exist."
-    echo "  --with-env      Copy my-env.el from Extras. User's PATH is personalized"
-    echo "                  during installation. (Mac OS X only unless given twice.)"
-    echo "  --no-home       Do not install $HOME/.emacs(.el)."
-    echo "  --no-backup     Do not backup $HOME/.emacs(.el) during install"
+    echo ""
+    echo "  --no-install    Do not install emacs packages during script. Note: package"
+    echo "                  installation is required for full functionality of the config."
+    echo "  --no-custom     Do not copy emacs-custom.el from Extras, though the file is "
+    echo "                  always created if it does not exist. Without this, the file is"
+    echo "                  copied unless it already exists; see also --force-custom."
+    echo "  --no-env        Do not install my-env.el from Extras. Without this, my-env.el is"
+    echo "                  installed with user's PATH for Mac OS X only. See --force-env."
+    echo "  --no-home       Do not install $HOME/.emacs.el."
+    echo "  --no-backup     Do not backup $HOME/.emacs.el during install"
     echo "                  (ignored and irrelevant if --no-home is supplied)."
     echo "  --no-extras     Do not install extra files (Cask, themes, site-lisp)."
-    echo "  --minimal       Install base code only, no extras or packages."
-    echo "                  Sets --no-init and --no-extras, overriding --with-custom,"
-    echo "                  --with-env, and --install, though these can be set after."
-    echo "  --full          Equivalent to --install --with-custom --with-env."
+    echo ""
+    echo "  --force-custom  Install emacs-custom.el even if it already exists in target."
+    echo "                  Overrides --no-custom."
+    echo "  --force-env     Install my-env.el even on non-Mac platforms."
+    echo "                  Overrides --no-env."
+    echo "  --force-review  Force full review even if packages are not installed."
+    echo "                  Use this if the emacs packages have been pre-installed."
+    echo ""
     echo "  --safe          Do not overwrite existing files where possible."
     echo "  --homebrew      On Mac OS X, prefer homebrew versions of emacs and cask."
     echo "  --verbose       Display steps while executing them."
@@ -168,13 +178,13 @@ find_executables () {
     find_cask
     find_homebrew
     if ! find_emacs; then
-        if [[ -n "$do_install" ]]; then
+        if [[ -z "$no_install" ]]; then
             echo "$0 ERROR: cannot find suitable version of emacs, no files installed"
             echo "  Try specifying --emacs=PATH for emacs version >= $min_emacs_version ($min_emacs_preferred preferred)"
             exit 1
         else
             echo "$0 WARNING: cannot find suitable versino of emacs; cannot perform data review step."
-            no_review='true'
+            no_review='true' # ATTN: redundant for the moment
         fi
     fi
     if [[ -n "$verbose" ]]; then
@@ -214,18 +224,14 @@ while [ "$1" != "" ]; do
             echo "$version"
             exit
             ;;
-        --install)
-            do_install='true'
+        --no-install)
+            no_install='true'
             ;;
-        --with-custom)
-            with_custom='true'
+        --no-custom)
+            no_custom='true'
             ;;
-        --with-env)
-            if [[ -z "$with_env" ]]; then
-                with_env='true'
-            else
-                with_env='force'
-            fi
+        --no-env)
+            no_env='true'
             ;;
         --no-home)
             no_init='true'
@@ -236,17 +242,16 @@ while [ "$1" != "" ]; do
         --no-extras)
             no_extras='true'
             ;;
-        --minimal)
-            no_init='true'
-            no_extras='true'
-            do_install=''
-            with_custom=''
-            with_env=''
+        --force-custom)
+            force_custom='true'
+            no_custom=''
             ;;
-        --full)
-            do_install='true'
-            with_custom='true'
-            with_env='true'
+        --force-env)
+            force_env='true'
+            no_env=''
+            ;;
+        --force-review)
+            force_review='true'
             ;;
         --safe)
             safe='-n'
@@ -337,12 +342,17 @@ if [[ -n "$dry_run" || -n "$verbose" ]]; then
     [[ -d $target/site-lisp ]] || echo "mkdir -p $target/site-lisp"
     [[ -d $target/themes ]]    || echo "mkdir -p $target/themes"
     [[ ./ -ef $target/init ]]  || echo "$copy ./[a-z]* $target/init"
-    [[ -n "$no_extras" ]]      || echo "$copy Extras/site-lisp $target"
-    [[ -n "$no_extras" ]]      || echo "$copy Extras/themes $target"
-    [[ -n "$no_extras" ]]      || echo "cp $safe Extras/Cask $target"
-    [[ -n "$with_custom" ]] && echo "cp $safe Extras/emacs-custom.el $target"
-    [[ -z "$with_custom" && ! -e $target/emacs-custom.el ]] && echo "echo '' > $target/emacs-custom.el"
-    if [[ "$with_env" == "force" || ( -n "$with_env" && "$platform" == "darwin" ) ]]; then
+    if [[ -z "$no_extras" ]]; then
+        echo "$copy Extras/site-lisp $target"
+        echo "$copy Extras/themes $target"
+        echo "cp $safe Extras/Cask $target"
+    fi
+    if [[ -n "$force_custom" || ( -z "$no_custom" && ! -e $target/emacs-custom.el ) ]]; then
+        echo "cp $safe Extras/emacs-custom.el $target"
+    elif [[ -n "$no_custom" && ! -e $target/emacs-custom.el ]]; then
+        echo "echo '' > $target/emacs-custom.el"
+    fi
+    if [[ -n "$force_env" || ( -z "$no_env" && "$platform" == "darwin" ) ]]; then
         echo 'cat Extras/my-env.el | sed -E "s|\(setenv \"PATH\" \"[^\"]+\" *\)|(setenv \"PATH\" \"$PATH\")|" >' "$tmp_myenv"
         [[ -n "$safe" ]] && echo "cp $safe $tmp_myenv $target/my-env.el"
     fi
@@ -366,12 +376,17 @@ if [[ -z "$dry_run" ]]; then
     [[ -d $target/site-lisp ]] || mkdir -p $target/site-lisp
     [[ -d $target/themes ]]    || mkdir -p $target/themes
     [[ ./ -ef $target/init ]]  || $copy ./[a-z]* $target/init
-    [[ -n "$no_extras" ]]      || $copy Extras/site-lisp $target
-    [[ -n "$no_extras" ]]      || $copy Extras/themes $target
-    [[ -n "$no_extras" ]]      || cp $safe Extras/Cask $target
-    [[ -n "$with_custom" ]] && cp $safe Extras/emacs-custom.el $target
-    [[ -z "$with_custom" && ! -e $target/emacs-custom.el ]] && echo '' > $target/emacs-custom.el
-    if [[ "$with_env" == "force" || ( -n "$with_env" && "$platform" == "darwin" ) ]]; then
+    if [[ -z "$no_extras" ]]; then
+        $copy Extras/site-lisp $target
+        $copy Extras/themes $target
+        cp $safe Extras/Cask $target
+    fi
+    if [[ -n "$force_custom" || ( -z "$no_custom" && ! -e $target/emacs-custom.el ) ]]; then
+        cp $safe Extras/emacs-custom.el $target
+    elif [[ -n "$no_custom" && ! -e $target/emacs-custom.el ]]; then
+        echo '' > $target/emacs-custom.el
+    fi
+    if [[ -n "$force_env" || ( -z "$no_env" && "$platform" == "darwin" ) ]]; then
         cat Extras/my-env.el | sed -E "s|\(setenv \"PATH\" \"[^\"]+\" *\)|(setenv \"PATH\" \"$PATH\")|" > $tmp_myenv
         [[ -n "$safe" ]] && cp $safe $tmp_myenv $target/my-env.el
     fi
@@ -389,7 +404,7 @@ if [[ -z "$dry_run" ]]; then
 fi  
 
 # Package Installation
-if [[ -n "$do_install" ]]; then
+if [[ -z "$no_install" ]]; then
     if [[ "$package_label" == "package" && -n "$emacs_x" ]]; then
         if [[ -n "$dry_run" || -n "$verbose" ]]; then
             echo "(cd $target; $emacs_x --batch -Q --load init/Extras/packages.el --funcall install-init-packages)"
@@ -408,10 +423,13 @@ if [[ -n "$do_install" ]]; then
         echo "$0 ERROR: cannot install packages with type $package_label and cask $cask_x."
     fi
     review_type='' # packages installed, can do full review
+elif [[ -z "$force_review" ]]; then
+    review_type='-no-config' # if packages not installed, adjust review entry point
+    echo "$0 WARNING: Without emacs packages, customization review will have reduced functionality."
 fi
 
 # User Review of customizations and preferences
-if [[ -n "$emacs_x" ]]; then
+if [[ -n "$emacs_x" && -z "$no_review" ]]; then
     if [[ -n "$dry_run" || -n "$verbose" ]]; then
         echo "(cd $target; $emacs_x -Q --load init/Extras/review.el --funcall review-init-settings$review_type)"
     fi
@@ -429,8 +447,9 @@ fi
 echo ""
 echo "Emacs initialization now installed in $target with emacs $emacs_x."
 echo "Configuration:"
-echo "  package type: $package_label, install? ${do_install:-false}, homebrew preferred? ${use_homebrew:-false},"
-echo "  with custom? ${with_custom:-false}, with env? ${with_env:-false}, no home? ${no_init:-false}, no extras? ${no_extras:-false},"
-echo "  with the following options set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run}."
+echo "  package type: $package_label, homebrew preferred? ${use_homebrew:-false},"
+echo "  emacs packages were ${no_install:+not yet }installed, and also"
+echo "  installation suppressed for ${no_custom:+custom file, }${no_env:+my-env.el, }${no_init:+HOME/emacs.el, }${no_extras:+extra files, }and"
+echo "  the following options were set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run}."
 echo "Next: Start up emacs and get editing..."
 

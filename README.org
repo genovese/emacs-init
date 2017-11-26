@@ -128,49 +128,38 @@
 
    5. Run the install script. There is no need to set the =--target=
       option as it will be correct (=..)= by default for this case.
-      The script has a variety of options, but the simplest are
 
-      a. Install code, extras, and packages:
+      #+begin_src sh
+        bash Extras/Install.sh
+      #+end_src
 
-         #+begin_src sh
-           bash Extras/Install.sh --full
-         #+end_src
+      This will install the base code and all extras, including
+      overwriting =../emacs-custom.el= and =.emacs.el= in the home
+      directory. This will also install and compile the required
+      emacs packages in =../elpa= or =../.cask= (depending on the
+      setting of =--package=) These packages are needed to use this
+      emacs init-file configuration.
 
-         which will install the base code and all extras,
-         including overwriting =../emacs-custom.el= and
-         =.emacs.el= in the home directory. This will also
-         install the emacs packages needed to use this
-         emacs configuration and will set up emacs to
-         use those packages.
 
-      b. Install everything but do not overwrite target files:
+      The script has a variety of options; a few notable ones are:
 
-         #+begin_src sh
-           bash Extras/Install.sh --full --safe
-         #+end_src
+      a. =--safe= prevents ovewriting any files that already exit
+      b. =--package= sets the package system used to install the
+         emacs packages for the init file to run.
 
-         which will install the base and extras but will
-         not overwrite the =../Cask=, =../emacs-custom.el=, or
-         =~/.emacs.el= files if they already exist.
+         Allowed values for this option are /package/, /cask/,
+         /cask-homebrew/, or /auto/, with auto being the default. For
+         example, =--package=package= uses the package.el system. The
+         cask setting requires the ~cask~ package manager to be
+         installed, with cask-homebrew indicating to use the
+         homebrew version of cask. The auto setting attempts to
+         deduce the proper package system from the availability of
+         executables.
 
-      c. Install only the base code:
-
-         #+begin_src sh
-           bash Extras/Install.sh --minimal
-         #+end_src
-
-      d. When installing emacs packages with =--install= or =--full=,
-         the script attempts to deduce whether to use emacs's
-         package system or cask. The =--package= option (and also
-         =--homebrew= on Mac OS X) can set this explicitly.
-
-         For instance:
-         #+begin_src sh
-           bash Extras/Install.sh --full --package=package
-         #+end_src
-         will use emacs's package system. Other settings
-         are =cask= and =cask-homebrew,= if the cask tool
-         is installed.
+      c. On Mac OS X, the =--homebrew= option indicates to prefer
+         the homebrew version of various tools. In particular,
+         this affects which emacs is used for package installation
+         and the data review step.
 
       By including the =--dry-run= flag with any set of other options,
       you can see what the script will do without it taking any
@@ -180,6 +169,10 @@
       #+begin_src sh
         bash Extras/Install.sh --help
       #+end_src
+
+      Note that emacs package installation can take a few
+      minutes. Progress is indicates to the terminal, with
+      additional information printed when =--verbose= is supplied.
 
    6. The script evokes an application (within emacs of course)
       for personalizing some of the settings and data in
@@ -202,8 +195,11 @@
       + Viewing some tutorial information about the configuration.
 
       When complete, hit the 'All Done' button, and the Install
-      script will continue.
-
+      script will continue. If the emacs packages are not
+      installed, the customization portion of the review step
+      will have reduced functionality. If emacs packages have
+      been pre-installed, supply the =--force-review= flag to
+      get the full customization review.
 
 ** Method 2. Keeping this repository separate from an active emacs init directory
 
@@ -225,48 +221,42 @@
       #+end_src
 
    3. Run the install script with ~--target~ set to your emacs
-      initialization directory, for instance =~/.emacs.d=. There is a
-      variety of options, but the simplest are
+      initialization directory, for instance =~/.emacs.d=., with
 
-      a. Install code, extras, and packages:
+      #+begin_src sh
+        bash Extras/Install.sh --target=~/.emacs.d --full
+      #+end_src
 
-         #+begin_src sh
-           bash Extras/Install.sh --target=~/.emacs.d --full
-         #+end_src
-         which will install the base code and all extras,
-         including overwriting =../emacs-custom.el= and
-         =.emacs.el= in the home directory. This will also
-         install the emacs packages needed to use this
-         emacs configuration and will set up emacs to
-         use those packages.
+      where you should replace ``~/.emacs.d'' with whatever
+      directory contains the relevant =init=.
 
-      b. Install everything but do not overwrite target files:
+      This will install the base code and all extras, including
+      overwriting =emacs-custom.el= in the target directory and
+      =.emacs.el= in the home directory. This will also install and
+      compile the emacs packages in the =elpa= or =.cask= (depending on
+      the =--package= setting) subdirectory of the target directory.
+      These packages are needed to use this emacs init-file
+      configuration.
 
-         #+begin_src sh
-           bash Extras/Install.sh --target=~/.emacs.d --full --safe
-         #+end_src
-         which will install the base and extras but will
-         not overwrite the =../Cask=, =../emacs-custom.el=, or
-         =~/.emacs.el= files if they already exist.
+      The script has a variety of options; a few notable ones are:
 
-      c. Install only the base code:
+      a. =--safe= prevents ovewriting any files that already exit
+      b. =--package= sets the package system used to install the
+         emacs packages for the init file to run.
 
-         #+begin_src sh
-           bash Extras/Install.sh --target=~/.emacs. --minimal
-         #+end_src
+         Allowed values for this option are /package/, /cask/, 
+         /cask-homebrew/, or /auto/, with auto being the default.
+         For example, =--package=package= uses the package.el
+         system. The cask setting requires the ~cask~ package
+         manager to be installed, with cask-homebrew indicating
+         to use the homebrew version of cask. The auto setting
+         attempts to deduce the proper package system from
+         the availability of executables.
 
-      d. When installing emacs packages with =--install= or =--full=,
-         the script attempts to deduce whether to use emacs's
-         package system or cask. The =--package= option (and also
-         =--homebrew= on Mac OS X) can set this explicitly.
-
-         For instance:
-         #+begin_src sh
-           bash Extras/Install.sh --full --package=package
-         #+end_src
-         will use emacs's package system. Other settings
-         are =cask= and =cask-homebrew,= if the cask tool
-         is installed.
+      c. On Mac OS X, the =--homebrew= option indicates to prefer
+         the homebrew version of various tools. In particular,
+         this affects which emacs is used for package installation
+         and the data review step.
 
       By including the =--dry-run= flag with any set of other options,
       you can see what the script will do without it taking any
@@ -276,6 +266,10 @@
       #+begin_src sh
         bash Extras/Install.sh --help
       #+end_src
+
+      Note that emacs package installation can take a few
+      minutes. Progress is indicates to the terminal, with
+      additional information printed when =--verbose= is supplied.
 
    4. The script evokes an application (within emacs of course)
       for personalizing some of the settings and data in
@@ -298,7 +292,11 @@
       + Viewing some tutorial information about the configuration.
 
       When complete, hit the 'All Done' button, and the Install
-      script will continue.
+      script will continue. If the emacs packages are not
+      installed, the customization portion of the review step
+      will have reduced functionality. If emacs packages have
+      been pre-installed, supply the =--force-review= flag to
+      get the full customization review.
 
    In this case, note that the shell script =Extras/Update.sh= allows
    for simple updating of the Extras files (e.g., =Cask=) from the
