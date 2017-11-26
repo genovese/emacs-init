@@ -1,9 +1,33 @@
 #+TITLE: A Brief Overview of Configuration Features
 
 Review features of this init-file configuration below, and 
-when finished, type 'q' to exit.
+when finished, /type 'q' to exit/.
 
-* Special Keybindings
+* Notable Keybindings
+
+  This configuration provides a range of useful keybindings,
+  some standard, some not. An attempt has been made to keep
+  the bindings mnemonic and to arrange them in a thematic
+  hierarchy (key, Control-key, Meta-key, Meta-Control-key,
+  then other modifiers).
+
+  On Mac OS X, the modifier keys are set as follows:
+
+  + Control is ~control~
+  + Command is ~meta~
+  + Option  is ~alt~
+  + Fn      is ~super~
+
+  For example, to hit =M-x=, you hold down the Command key 
+  and hit x. I recommend rebinding Caps Lock to be control
+  in =System Preferences > Keyboard > Modifier Keys=.
+  
+  Also note, the configuration turns on =which-key-mode=
+  by default, so after typing a prefix key (e.g., =M-C-h=),
+  you can wait for 1.5 seconds to see a popup showing
+  you all the following keys and the commands they
+  initiate.
+
 ** Help
 
   Default emacs keybindings reserve =C-h= for help. While
@@ -143,6 +167,13 @@ when finished, type 'q' to exit.
 
   The =components= directory contains files that each load
   and configure a cluster of related packages and/or modes.
+  This includes specific programming languages, TeX and LaTex,
+  tools such as org and version control, and basic features such
+  as completion, search, and display. For customizing your
+  initialization on these or similar features, I recommend either
+  modifying these components or adding your own. For example,
+  to add customizations for Python or R, you can edit the
+  components =python.el= and =ess.el=, respectively.
 
   The =mods= directory contains mode- or tool-specific modifications and
   code. These represent structural changes or code that offers
@@ -157,3 +188,5 @@ when finished, type 'q' to exit.
   A modified zenburn theme, zenburn+, is available
   in =Extras/themes=.
 
+
+#+STARTUP: showall

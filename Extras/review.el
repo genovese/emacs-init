@@ -197,6 +197,7 @@ field for user editing, returning point."
     (with-current-buffer pref-buf
       (let ((inhibit-read-only t)) (remove-overlays))
       (setq buffer-read-only t)
+      (when (fboundp 'fci-mode) (fci-mode -1))
       (goto-char (point-min))
       (setq start-point (review/prepare-preferences-data
                          (lambda ()
@@ -217,7 +218,6 @@ field for user editing, returning point."
   (let ((custom-buf (get-buffer-create (review/ui-bufname 'custom)))
         (old-custom custom-file))
     (setq custom-file (expand-file-name customize-file)) ;; need dynamic binding
-    ;(load-file custom-file) ; use current settings as a starting point
     (with-current-buffer custom-buf
       (setq buffer-read-only nil)
       (erase-buffer)
@@ -233,7 +233,7 @@ field for user editing, returning point."
         (with-current-buffer custom-buf
           (cond
            ((eq (car form) 'custom-set-variables)
-            (insert "Variables:\n")
+            (insert "Variables:\n") ; show key and value in echo area too
             (dolist (setting (cdr form))
               (let ((var (caadr setting))
                     (val (cadadr setting)))
@@ -248,11 +248,7 @@ field for user editing, returning point."
                                'action `(lambda (b) (customize-variable ',var)))
                 (insert "\n"))))
            ((eq (car form) 'custom-set-faces)
-            ;; load faces and instantiate now
-            (setcdr form (mapcar (lambda (f) `'(,@(cadr f) t)) (cdr form)))
-            (eval form)
-            ;; list face customization buttons in those faces
-            (insert "Faces:\n")
+            (insert "Faces:\n") ; show faces for buttons and in echo area too
             (dolist (setting (cdr form))
               (let ((var (caadr setting)))
                 (insert (format "  %-42s" var))
@@ -300,6 +296,43 @@ field for user editing, returning point."
     (search-forward-regexp "^\*" nil t)
     (ignore-errors (backward-char 1))))
 
+(defvar no-user-init-startup-actions t
+  "This is bound to inhibit startup actions when loading dot-emacs.el.")
+
+(defvar review-packages-custom-needs
+  '(ox ediff)
+  "List of requires that must be loaded, above and beyond those in the
+main config, for the customization review to change them")
+
+;; This sets the state necessary for the init configuration to be
+;; loadable at review time. The primary reason this is needed is for
+;; the customization review so that the custom-set variables are
+;; marked as customizable and have values and documentation. But it
+;; helps also with the tutorial view and with general use pattern.
+;; ATTN: This is a bit of a hack, and it sets various files directly,
+;; especially emacs-custom.el in a non-DRY way. But it will do for now.
+(defun review-load-current-config ()
+  "Load the emacs init configuration in this directory without startup actions.
+This ensures that the right packages are loaded so that the
+customization step can get useful information for customizing the
+variables. Without this, all the package-specific variables are
+listed in a useless form within the customize buffers.
+
+This assumes that the packages have been installed and that the
+script has been evoked in the target directory which contains
+both the elpa and init subdirectories. (This can be the user's
+emacs directory or any other directory where the config has been
+installed.)"
+  (let* ((user-emacs-directory (file-name-directory (expand-file-name "./")))
+         (custom-file (expand-file-name "emacs-custom.el" user-emacs-directory)))
+    (setq package-user-dir (expand-file-name "elpa" user-emacs-directory))
+    (package-initialize)
+    (load-file "init/dot-emacs.el")
+    (dolist (package review-packages-custom-needs)
+      (require package nil t))
+    (map-put initial-frame-alist 'width 80) ; keep -Q frame size
+    (map-put initial-frame-alist 'height 40))) 
+
 ;;; User-Interface Entry Point
 
 (defun review-init-settings (&optional init-dir)
@@ -307,6 +340,7 @@ field for user editing, returning point."
 This should be called in the directory containing the `init' subdirectory,
 which will typically be the user's .emacs.d directory."
   (interactive)
+  (review-load-current-config)
   (let ((dir (or init-dir (thread-first "./init/" 
                             expand-file-name
                             file-name-directory)))
@@ -314,12 +348,18 @@ which will typically be the user's .emacs.d directory."
         (widget-push-button-suffix (if review/fancy-buttons-p "" "]"))
         (next-step (lambda ()
                      (review/return-to-manager)
-                     (widget-forward 1))))
+                     (widget-forward 1)))
+        (cleanup (lambda (&rest ignore)
+                   (interactive)
+                   (message "Cleaning up...")
+                   (kill-buffer)
+                   (save-buffers-kill-terminal))))
     (review/return-to-manager)
     (kill-all-local-variables)
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (remove-overlays))
+      (remove-overlays)
+      (local-set-key "\C-c\C-c" cleanup))
     (widget-insert
      (concat "Push each of the following buttons in turn to "
              "review and adjust emacs setup.\n"
@@ -341,8 +381,8 @@ which will typically be the user's .emacs.d directory."
     (widget-create 'push-button
                    :button-face review/ui-wbutton-face
                    :notify (let ((custom (thread-last dir
-                                          (expand-file-name "..")
-                                          (expand-file-name "emacs-custom.el"))))
+                                           (expand-file-name "..")
+                                           (expand-file-name "emacs-custom.el"))))
                              (lambda (&rest ignore)
                                (review-custom-file-settings custom next-step)
                                (message "Step 2. Review Customization Settings")))
@@ -364,10 +404,7 @@ which will typically be the user's .emacs.d directory."
     (widget-create 'push-button
                    :button-face review/ui-wbutton-face
                    :help-echo "Clean up the user interface and exit emacs"
-                   :notify (lambda (&rest ignore)
-                             (message "Cleaning up...")
-                             (kill-buffer)
-                             (save-buffers-kill-terminal))
+                   :notify cleanup
                    "All Done")
     (widget-insert "\n")
     (widget-setup)

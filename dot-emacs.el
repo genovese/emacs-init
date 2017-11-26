@@ -228,7 +228,7 @@ See `set-preferences' and `get-preference'.")
 (transient-mark-mode '1)                 ; Highlight region
 (turn-on-show-paren-mode)                ; show matching parens
 (display-time)                           ; Time on Mode Line
-(enable-cua-rectangles)                  ; C-c RET starts rectangle
+(enable-cua-rectangles)                  ; C-c C-RET starts rectangle
 
 ;; Rename scratch buffer if requested in preferences
 (when-let ((scratch-name (get-preference 'scratch-buffer))
@@ -247,17 +247,6 @@ See `set-preferences' and `get-preference'.")
   (setq custom-file user-custom-file)
   (load-file user-custom-file)) 
 
-;; Start in the shell, in a single, full-frame window.
-;; Name buffer *unix* rather than *shell* because it's easier to complete.
-(let* ((shell-buf (generate-new-buffer-name "*unix*")))
-  (shell shell-buf)
-  (with-selected-window (get-buffer-window shell-buf)
-    (delete-other-windows)))
-
-;; Load specified theme, if any
-(when (and window-system my/theme-func (fboundp my/theme-func))
-  (funcall my/theme-func))
-
 ;; Tidy up minor-mode lighters on the mode line
 (ignore-errors
   (when (featurep 'diminish)
@@ -265,14 +254,28 @@ See `set-preferences' and `get-preference'.")
       (dolist (lighter lighters)
         (diminish (car lighter) (cdr lighter))))))
 
-;; Load current prototype code
+;; Load current prototype code, except for names prefixed with '-'
 (dolist (proto (directory-files
                 (locate-user-emacs-file "init/prototypes") t "\\.el\\'"))
   (when (and (file-exists-p proto) (not (string-match-p "^-" proto)))
     (load-file proto)))
 
-;; Allow access through emacsclient
-(server-start)
+;; Load specified theme, if any
+(when (and window-system my/theme-func (fboundp my/theme-func))
+  (funcall my/theme-func))
 
+
+;; Startup actions unless in batch mode or cold loading
+(unless (or noninteractive (boundp 'no-user-init-startup-actions))
+  (message "Performing startup actions")
+  ;; Start in the shell, in a single, full-frame window.
+  ;; Name buffer *unix* rather than *shell* because it's easier to complete.
+  (let* ((shell-buf (generate-new-buffer-name "*unix*")))
+    (shell shell-buf)
+    (with-selected-window (get-buffer-window shell-buf)
+      (delete-other-windows)))
+
+  ;; Allow access through emacsclient
+  (server-start))
 
 ;;; dot-emacs.el ends here

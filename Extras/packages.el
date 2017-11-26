@@ -19,7 +19,7 @@
 order of importance.")
 
 
-;;; Tools
+;;; Generic Tools
 
 (defmacro doforms (form-spec &rest body)
   "Loop over the elisp forms in a buffer, evaluate BODY with VAR
@@ -44,6 +44,39 @@ without surrounding parentheses.
                              (end-of-file nil)))
            ,@body))
        ,@result)))
+
+
+;;; Special Case Package Fixes
+
+(defun init/install-fix-auctex (&optional logger)
+  "Make auctex.el provide 'auctex for easier load by use-package"
+  (let* ((auctex (condition-case _
+                     (find-library-name "auctex")
+                   (error nil)))
+         (buf (when auctex (find-file-noselect auctex)))
+         (compiled? nil)
+         (tag "(provide 'auctex)"))
+    (when auctex
+      (with-current-buffer buf
+        (goto-char (point-min))
+        (unless (condition-case _ (search-forward tag) (search-failed nil))
+          (goto-char (point-max))
+          (insert "\n" tag "\n")
+          (basic-save-buffer)))
+      (setq compiled? (byte-compile-file auctex))
+      (when logger
+        (funcall logger "\nPackage auctex fixed,"
+                 "byte compilation " (if compiled? "succeeded." "failed."))))
+    compiled?))
+
+(defun init/install-specialty-fixes (&optional logger)
+  "Perform all specialty fixes, logging if possible.
+LOGGER is a function that takes two strings (and a third optional string)
+to send to the echo area and log buffer (if interactive)."
+  (init/install-fix-auctex logger))
+
+
+;;; Installation Utilities
 
 (defun init/packages-from-cask (cask-file)
   "Construct list of package symbols from depends-on forms in CASK-FILE.
@@ -93,7 +126,7 @@ PACKAGE-LIST is a list of symbols"
                       pkg extra)))
          (cnt 0)
          (error-cnt 0))
-    (unless no-log  ; initialize log buffer
+    (unless no-log                      ; initialize log buffer
       (with-current-buffer log-buf
         (view-mode -1)
         (fundamental-mode)
@@ -114,7 +147,8 @@ PACKAGE-LIST is a list of symbols"
              (format "with %d error%s (%d/%d successful)."
                      error-cnt (if (= error-cnt 1) "" "s")
                      cnt (+ cnt error-cnt)))
-    (unless no-log ; finalize log buffer
+    (init/install-specialty-fixes log)
+    (unless no-log                      ; finalize log buffer
       (with-current-buffer log-buf
         (view-mode 1)
         (setq buffer-read-only t
@@ -137,14 +171,19 @@ from `init/priority-packages' put first."
                                       (thread-first "elpa"
                                         expand-file-name
                                         abbreviate-file-name
-                                        directory-file-name)))
+                                        directory-file-name))
+        user-emacs-directory      (file-name-directory
+                                   (expand-file-name "./" install-dir)))
+  (package-initialize)
+  (unless package-archive-contents
+    (package-refresh-contents))
   (thread-first (or cask-file
                     (let (file)
                       (and install-dir
                            (file-readable-p
                             (setq file (expand-file-name "../Cask" install-dir)))
                            cfile))
-                     "init/Extras/Cask")
+                    "init/Extras/Cask")
     (init/packages-from-cask)
     (init/promote-priority-packages init/priority-packages)
     (init/install-packages noninteractive)))

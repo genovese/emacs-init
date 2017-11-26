@@ -36,24 +36,6 @@
        now)
       (quote help-echo)
       (format-time-string "%a %d %b %Y" now)))))
- '(ecb-options-version "2.40")
- '(ecb-source-path
-   (quote
-    (("~/software/Emacs/Startup" "Emacs Startup")
-     ("~/Documents/Eclipse35workspace" "Android Dev")
-     ("~/Programming/Python" "Python General")
-     ("~/Programming/Arduino" "Arduino")
-     ("~/Documents/Processing" "Processing")
-     ("~/Programming/Java" "Java General")
-     ("~/Programming/Emacs" "Elisp General")
-     ("~/Programming/C++" "C++ General")
-     ("~/Programming/Mac" "OS X"))))
- '(ecb-tip-of-the-day nil)
- '(el-get-recipe-path
-   (quote
-    ("~/.emacs.d/el-get/recipes/local" "~/.emacs.d/el-get/el-get/recipes" "~/.emacs.d/el-get/recipes/elpa/" "~/.emacs.d/el-get/recipes/emacswiki/")))
- '(el-get-user-package-directory "~/.emacs.d/el-get/init")
- '(el-get-verbose t)
  '(electric-indent-mode nil)
  '(elpy-rpc-python-command "python3")
  '(fci-rule-color "#383838")
@@ -166,13 +148,6 @@
         (idx 1))
       ("All"
        (name . "."))))))
- '(jde-jdk (quote ("1.5.0")))
- '(jde-jdk-registry
-   (quote
-    (("1.6.0" . "/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0")
-     ("1.5.0" . "/System/Library/Frameworks/JavaVM.framework/Versions/1.5.0")
-     ("1.4.2" . "/System/Library/Frameworks/JavaVM.framework/Versions/1.4.2"))))
- '(nxhtml-skip-welcome t)
  '(org-export-backends (quote (ascii beamer html icalendar latex md texinfo deck)))
  '(org-export-with-toc nil)
  '(org-structure-template-alist
