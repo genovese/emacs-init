@@ -450,6 +450,6 @@ echo "Configuration:"
 echo "  package type: $package_label, homebrew preferred? ${use_homebrew:-false},"
 echo "  emacs packages were ${no_install:+not yet }installed, and also"
 echo "  installation suppressed for ${no_custom:+custom file, }${no_env:+my-env.el, }${no_init:+HOME/emacs.el, }${no_extras:+extra files, }and"
-echo "  the following options were set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run}."
+echo "  the following options were set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run }${force_review:+--force-review }${force_env:+--force-env }${force_custom:+--force-custom}."
 echo "Next: Start up emacs and get editing..."
 

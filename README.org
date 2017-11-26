@@ -2,93 +2,12 @@
 #+AUTHOR: Christopher R. Genovese
 #+DATE: 30 Oct 2017
 
-* Overview
-
-  This is my working emacs configuration, currently used for Emacs 25+ but
-  should work for Emacs 24+.
-
-  A few notable features:
-
-  + Keybindings: Help
-
-    Default emacs keybindings reserve =C-h= for help. While
-    help is important and commonly used, it does not
-    need a top-level (control) key. Instead, we do the
-    following:
-
-    - =C-h= -- =delete-backward-char=
-    - =M-h= -- =backward-kill-word=
-    - =C-M-h= -- help
-
-    This is much more efficient than the defaults (no more need for
-    backspace and =backward-kill-word= is very commonly useful). The main
-    complication is that most modes (and to some extend emacs itself,
-    see =help-char=) assume =C-h= for help, which requires additional
-    effort to configure.
-
-  + Keybindings: Scrolling and Cutting
-
-    Also in the default keybindings use =C-v= and =M-v= for scrolling up and
-    down. This cuts across levels (control to meta) for a
-    comparable-level operation and is slow, as a result. It also
-    leaves =C-w=, non-mnemonically, for a kill operation. Instead,
-    the keybindings here do the following:
-
-    - =C-w= -- scroll down
-    - =C-v= -- scroll up
-    - =M-w= -- beginning of buffer
-    - =M-v= -- end of buffer
-    - =M-C-w= -- scroll down other window
-    - =M-C-v= -- scroll up other window
-    - =C-k= -- kill line
-    - =M-k= -- kill region
-    - =M-C-k= -- kill sexp
-
-    Again, this requires some remapping in configuring some common
-    modes.
-
-  + Help Navigation
-
-    To make the Emacs help system even easier to use, this adds
-    two mechanisms for navigating. First =C-M-h g= from any buffer
-    moves to the help buffer, where =g= moves back to the previous
-    location. Second, =C-M-h= followed by various navigation commands
-    moves the help buffer without changing the active buffer.
-    These commands are as follows:
-
-    - =C-w=   -- scroll down
-    - =C-v=   -- scroll up
-    - =M-w=   -- go to beginning of buffer
-    - =M-v=   -- go to end of buffer
-    - =C-b=   -- back to previous help page
-    - =C-f=   -- forward to next help page
-    - =RET=   -- push button
-    - =TAB=   -- forward-button
-    - =S-TAB= -- backward-button
-    - =q=     -- quit help
-
-  + Server start
-
-    This initialization always starts the emacs-server so
-    you can interact with a running instance using emacsclient.
-
-  + Components and Mods
-
-    The =components= directory contains files that each load
-    and configure a cluster of related packages and/or modes.
-
-    The =mods= directory contains mode- or tool-specific modifications and
-    code. These represent structural changes or code that offers
-    new/improved functionality. This includes improved help navigation,
-    directory tracking systems for tcsh and zsh (separately), extensions
-    to dired, and some extra tools for AucTeX and Org. Some of the
-    earlier mods have been spun off into their own packages (e.g.,
-    =win-switch=) or into existing emacs code (e.g., =ibuffer=).
-
-  + Zenburn+ Theme
-
-    A modified zenburn theme, zenburn+, is available
-    in =Extras/themes=.
+This is my working emacs configuration, currently used for Emacs 25+
+but should work for Emacs 24+. The installation process described
+below will install the required emacs packags, will open a tool to
+let you quickly personalize the data and customizations used in the
+init file, and will offer a tutorial on notable features of this
+init-file configuration.
 
 * Installation
 
@@ -326,6 +245,93 @@
    If --package is not supplied, the script will attempt to auto-deduce
    it based on your system, on whether it can find the =cask= tool, and
    on whether the =--homebrew= option is supplied.
+
+* Usage Overview
+
+  A few notable features are described below. See also the
+  file =Extras/tutorial.org= for some more detail; this tutorial
+  is displayed during the review step of initialization.
+
+  + Keybindings: Help
+
+    Default emacs keybindings reserve =C-h= for help. While
+    help is important and commonly used, it does not
+    need a top-level (control) key. Instead, we do the
+    following:
+
+    - =C-h= -- =delete-backward-char=
+    - =M-h= -- =backward-kill-word=
+    - =C-M-h= -- help
+
+    This is much more efficient than the defaults (no more need for
+    backspace and =backward-kill-word= is very commonly useful). The main
+    complication is that most modes (and to some extend emacs itself,
+    see =help-char=) assume =C-h= for help, which requires additional
+    effort to configure.
+
+  + Keybindings: Scrolling and Cutting
+
+    Also in the default keybindings use =C-v= and =M-v= for scrolling up and
+    down. This cuts across levels (control to meta) for a
+    comparable-level operation and is slow, as a result. It also
+    leaves =C-w=, non-mnemonically, for a kill operation. Instead,
+    the keybindings here do the following:
+
+    - =C-w= -- scroll down
+    - =C-v= -- scroll up
+    - =M-w= -- beginning of buffer
+    - =M-v= -- end of buffer
+    - =M-C-w= -- scroll down other window
+    - =M-C-v= -- scroll up other window
+    - =C-k= -- kill line
+    - =M-k= -- kill region
+    - =M-C-k= -- kill sexp
+
+    Again, this requires some remapping in configuring some common
+    modes.
+
+  + Help Navigation
+
+    To make the Emacs help system even easier to use, this adds
+    two mechanisms for navigating. First =C-M-h g= from any buffer
+    moves to the help buffer, where =g= moves back to the previous
+    location. Second, =C-M-h= followed by various navigation commands
+    moves the help buffer without changing the active buffer.
+    These commands are as follows:
+
+    - =C-w=   -- scroll down
+    - =C-v=   -- scroll up
+    - =M-w=   -- go to beginning of buffer
+    - =M-v=   -- go to end of buffer
+    - =C-b=   -- back to previous help page
+    - =C-f=   -- forward to next help page
+    - =RET=   -- push button
+    - =TAB=   -- forward-button
+    - =S-TAB= -- backward-button
+    - =q=     -- quit help
+
+  + Server start
+
+    This initialization always starts the emacs-server so
+    you can interact with a running instance using emacsclient.
+
+  + Components and Mods
+
+    The =components= directory contains files that each load
+    and configure a cluster of related packages and/or modes.
+
+    The =mods= directory contains mode- or tool-specific modifications and
+    code. These represent structural changes or code that offers
+    new/improved functionality. This includes improved help navigation,
+    directory tracking systems for tcsh and zsh (separately), extensions
+    to dired, and some extra tools for AucTeX and Org. Some of the
+    earlier mods have been spun off into their own packages (e.g.,
+    =win-switch=) or into existing emacs code (e.g., =ibuffer=).
+
+  + Zenburn+ Theme
+
+    A modified zenburn theme, zenburn+, is available
+    in =Extras/themes=.
 
 * File Manifest
 
