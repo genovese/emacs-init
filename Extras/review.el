@@ -296,6 +296,24 @@ field for user editing, returning point."
     (search-forward-regexp "^\*" nil t)
     (ignore-errors (backward-char 1))))
 
+
+;;; Config Loading
+;;
+;; This sets the state necessary for the init configuration to be
+;; loadable at review time. The primary reason this is helpful is for
+;; the customization review, because customize-variable does not show
+;; proper information unless the variables have been identified and
+;; marked as customizable, along with their values and documentation.
+;; But helps also with the tutorial view and with providing the user
+;; a first view of what the config will be giving them. Note, though,
+;; that if the user has not installed the packages, we cannot load
+;; the config without error.
+;; 
+;; ATTN: This is a bit of a hack, and is somewhat non-DRY. The file
+;; and directory settings are set directly (and set elsewhere separately
+;; in this module), and a list of "extra" requires is hard-coded here
+;; rather than derived.
+
 (defvar no-user-init-startup-actions t
   "This is bound to inhibit startup actions when loading dot-emacs.el.")
 
@@ -304,13 +322,6 @@ field for user editing, returning point."
   "List of requires that must be loaded, above and beyond those in the
 main config, for the customization review to change them")
 
-;; This sets the state necessary for the init configuration to be
-;; loadable at review time. The primary reason this is needed is for
-;; the customization review so that the custom-set variables are
-;; marked as customizable and have values and documentation. But it
-;; helps also with the tutorial view and with general use pattern.
-;; ATTN: This is a bit of a hack, and it sets various files directly,
-;; especially emacs-custom.el in a non-DRY way. But it will do for now.
 (defun review-load-current-config ()
   "Load the emacs init configuration in this directory without startup actions.
 This ensures that the right packages are loaded so that the
@@ -333,14 +344,15 @@ installed.)"
     (map-put initial-frame-alist 'width 80) ; keep -Q frame size
     (map-put initial-frame-alist 'height 40))) 
 
+
 ;;; User-Interface Entry Point
 
-(defun review-init-settings (&optional init-dir)
+(defun review-init-settings (&optional init-dir no-config)
   "Start application to review and personalized init-file settings.
 This should be called in the directory containing the `init' subdirectory,
 which will typically be the user's .emacs.d directory."
   (interactive)
-  (review-load-current-config)
+  (unless no-config (review-load-current-config))
   (let ((dir (or init-dir (thread-first "./init/" 
                             expand-file-name
                             file-name-directory)))
@@ -411,6 +423,10 @@ which will typically be the user's .emacs.d directory."
     (review/form-nav-mode 1)
     (goto-char (point-min))
     (widget-forward 1)))
+
+(defun review-init-settings-no-config (&optional init-dir)
+  "Like `review-init-settings' for when packages are not available."
+  (review-init-settings init-dir t))
 
 
 ;;; review.el ends here

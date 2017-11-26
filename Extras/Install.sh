@@ -46,6 +46,7 @@ emacs_version=0
 found_exes=''
 tmp_myenv=''
 tmp_emacs=''
+review_type='-no-config' # if packages not installed, adjust review entry point
 
 
 usage () {
@@ -406,15 +407,16 @@ if [[ -n "$do_install" ]]; then
     else
         echo "$0 ERROR: cannot install packages with type $package_label and cask $cask_x."
     fi
+    review_type='' # packages installed, can do full review
 fi
 
 # User Review of customizations and preferences
 if [[ -n "$emacs_x" ]]; then
     if [[ -n "$dry_run" || -n "$verbose" ]]; then
-        echo "(cd $target; $emacs_x -Q --load init/Extras/review.el --funcall review-init-settings)"
+        echo "(cd $target; $emacs_x -Q --load init/Extras/review.el --funcall review-init-settings$review_type)"
     fi
     if [[ -z "$dry_run" ]]; then
-        (cd $target; $emacs_x -Q --load init/Extras/review.el --funcall review-init-settings)
+        (cd $target; $emacs_x -Q --load init/Extras/review.el --funcall review-init-settings$review_type)
     fi
 fi
 
