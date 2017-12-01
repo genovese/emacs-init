@@ -119,7 +119,7 @@ find_homebrew () {
 
 is_emacs_supported() {
     if [[ -n "$emacs_x" && -x "$emacs_x" ]]; then
-        emacs_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+)\..*$/\1/;2,$d')
+        emacs_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+)\.([0-9]+).*$/\1.\2/;2,$d')
         if (( $emacs_version > $min_emacs_version )); then
             return 0
         else
@@ -407,17 +407,20 @@ fi
 if [[ -z "$no_install" ]]; then
     if [[ "$package_label" == "package" && -n "$emacs_x" ]]; then
         if [[ -n "$dry_run" || -n "$verbose" ]]; then
-            echo "(cd $target; $emacs_x --batch -Q --load init/Extras/packages.el --funcall install-init-packages)"
+            echo "$emacs_x --batch -Q --chdir $target --load init/Extras/packages.el --funcall install-init-packages"
         fi
         if [[ -z "$dry_run" ]]; then
-            (cd $target; $emacs_x --batch -Q --load init/Extras/packages.el --funcall install-init-packages)
+            $emacs_x --batch -Q --chdir $target --load init/Extras/packages.el --funcall install-init-packages
         fi
     elif [[ -n "$cask_x" ]]; then
+        add_load_path_subdirs="(let ((default-directory (expand-file-name \".cask/$emacs_version/elpa\"))) (normal-top-level-add-subdirs-to-load-path))"
         if [[ -n "$dry_run" || -n "$verbose" ]]; then
             echo "(cd $target; $cask_x install $verbose)"
+            echo "(cd $target; $cask_x emacs --batch -Q --eval '$add_load_path_subdirs' --load init/Extras/packages.el --funcall init/install-specialty-fixes)"
         fi
         if [[ -z "$dry_run" ]]; then
             (cd $target; $cask_x install $verbose)
+            (cd $target; $cask_x emacs --batch -Q --eval "$add_load_path_subdirs" --load init/Extras/packages.el --funcall init/install-specialty-fixes)
         fi
     else
         echo "$0 ERROR: cannot install packages with type $package_label and cask $cask_x."
@@ -431,10 +434,10 @@ fi
 # User Review of customizations and preferences
 if [[ -n "$emacs_x" && -z "$no_review" ]]; then
     if [[ -n "$dry_run" || -n "$verbose" ]]; then
-        echo "(cd $target; $emacs_x -Q --load init/Extras/review.el --funcall review-init-settings$review_type)"
+        echo "$emacs_x -Q --chdir $target --load init/Extras/review.el --eval \"(review-init-settings$review_type :$package_label)\""
     fi
     if [[ -z "$dry_run" ]]; then
-        (cd $target; $emacs_x -Q --load init/Extras/review.el --funcall review-init-settings$review_type)
+        $emacs_x -Q --chdir $target --load init/Extras/review.el --eval "(review-init-settings$review_type :$package_label)"
     fi
 fi
 

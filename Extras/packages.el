@@ -2,6 +2,7 @@
 
 (require 'cl-lib)
 (require 'subr-x)
+(require 'find-func)
 
 
 ;;; Configuration
@@ -62,6 +63,7 @@ without surrounding parentheses.
         (unless (condition-case _ (search-forward tag) (search-failed nil))
           (goto-char (point-max))
           (insert "\n" tag "\n")
+          (set (make-local-variable 'backup-inhibited) t)
           (basic-save-buffer)))
       (setq compiled? (byte-compile-file auctex))
       (when logger
@@ -73,6 +75,8 @@ without surrounding parentheses.
   "Perform all specialty fixes, logging if possible.
 LOGGER is a function that takes two strings (and a third optional string)
 to send to the echo area and log buffer (if interactive)."
+  (interactive (list (lambda (s1 s2 &optional s3)
+                       (message "%s %s%s" s1 s2 (or s3 "")))))
   (init/install-fix-auctex logger))
 
 

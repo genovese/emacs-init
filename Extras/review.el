@@ -322,7 +322,7 @@ field for user editing, returning point."
   "List of requires that must be loaded, above and beyond those in the
 main config, for the customization review to change them")
 
-(defun review-load-current-config ()
+(defun review-load-current-config (&optional package-type)
   "Load the emacs init configuration in this directory without startup actions.
 This ensures that the right packages are loaded so that the
 customization step can get useful information for customizing the
@@ -331,13 +331,26 @@ listed in a useless form within the customize buffers.
 
 This assumes that the packages have been installed and that the
 script has been evoked in the target directory which contains
-both the elpa and init subdirectories. (This can be the user's
+both the package and init subdirectories. (This can be the user's
 emacs directory or any other directory where the config has been
-installed.)"
+installed.)
+
+PACKAGE-TYPE should be either nil or :package, :cask, or :cask-homebrew. 
+The first two use the standard package system, with packages stored in 
+the elpa subdirectory; the latter two use cask, requiring cask.el either 
+in the home directory or in its homebrew location."
   (let* ((user-emacs-directory (file-name-directory (expand-file-name "./")))
          (custom-file (expand-file-name "emacs-custom.el" user-emacs-directory)))
-    (setq package-user-dir (expand-file-name "elpa" user-emacs-directory))
-    (package-initialize)
+    (cond
+     ((eq package-type :cask)
+      (require 'cask "~/.cask/cask.el")
+      (cask-initialize))
+     ((eq package-type :cask-homebrew)
+      (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
+      (cask-initialize))
+     (t
+      (setq package-user-dir (expand-file-name "elpa" user-emacs-directory))
+      (package-initialize)))
     (load-file "init/dot-emacs.el")
     (dolist (package review-packages-custom-needs)
       (require package nil t))
@@ -347,12 +360,12 @@ installed.)"
 
 ;;; User-Interface Entry Point
 
-(defun review-init-settings (&optional init-dir no-config)
+(defun review-init-settings (&optional package-type init-dir no-config)
   "Start application to review and personalized init-file settings.
 This should be called in the directory containing the `init' subdirectory,
 which will typically be the user's .emacs.d directory."
   (interactive)
-  (unless no-config (review-load-current-config))
+  (unless no-config (review-load-current-config package-type))
   (let ((dir (or init-dir (thread-first "./init/" 
                             expand-file-name
                             file-name-directory)))
@@ -424,9 +437,9 @@ which will typically be the user's .emacs.d directory."
     (goto-char (point-min))
     (widget-forward 1)))
 
-(defun review-init-settings-no-config (&optional init-dir)
+(defun review-init-settings-no-config (&optional package-type init-dir)
   "Like `review-init-settings' for when packages are not available."
-  (review-init-settings init-dir t))
+  (review-init-settings package-type init-dir t))
 
 
 ;;; review.el ends here
