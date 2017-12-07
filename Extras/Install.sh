@@ -121,7 +121,7 @@ find_homebrew () {
 is_emacs_supported() {
     if [[ -n "$emacs_x" && -x "$emacs_x" ]]; then
         emacs_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+)\.([0-9]+).*$/\1.\2/;2,$d')
-        emacs_major_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+).*$/\1.\2/;2,$d')
+        emacs_major_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+).*$/\1/;2,$d')
         if (( $emacs_major_version > $min_emacs_version )); then
             return 0
         else
