@@ -193,7 +193,7 @@ See `set-preferences' and `get-preference'.")
 
 (let ((xml-re
        (concat "\\."
-               (regexp-opt '("xml" "xsd" "sch" "rng" "xslt" "svg" "rss") t)
+               (regexp-opt '("xml" "xsd" "sch" "rng" "xslt" "rss") t)
                "\\'")))
   (defvar my/auto-mode-alist
     `(("\\.org\\'"  . org-mode)
