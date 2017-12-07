@@ -45,6 +45,7 @@ cask_x=''
 emacs_x=''          # vvv use  tr '[:upper:]' '[:lower:]' if tr available
 platform=$(uname -s | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/')
 emacs_version=0
+emacs_major_version=0
 found_exes=''
 tmp_myenv=''
 tmp_emacs=''
@@ -158,9 +159,9 @@ find_emacs () {
     do
         emacs_x="${ee/#\~/$HOME}"
         if is_emacs_supported; then
-            if (( $emacs_version > $found_version )); then
+            if (( $emacs_major_version > $found_version )); then
                 found_emacs="$emacs_x"
-                found_version=$emacs_version
+                found_version=$emacs_major_version
             fi
         fi
     done    
