@@ -26,6 +26,7 @@ emacs_bin=''
 package_label='auto'
 package_out=''
 use_homebrew=''
+init_file="$HOME/.emacs.el"
 no_install=''
 no_init=''
 no_backup=''
@@ -66,6 +67,7 @@ usage () {
     echo "                  auto attempts to deduce type from cask and homebrew availability."
     echo "  --emacs=PATH    Path to the emacs executable, if otherwise ambiguous or unusual."
     echo "                  Not usually needed, as emacs is auto-detected by default."
+    echo "  --init-file=FN  Name to use for root init file instead of $init_file."
     echo ""
     echo "  --no-install    Do not install emacs packages during script. Note: package"
     echo "                  installation is required for full functionality of the config."
@@ -74,9 +76,10 @@ usage () {
     echo "                  copied unless it already exists; see also --force-custom."
     echo "  --no-env        Do not install my-env.el from Extras. Without this, my-env.el is"
     echo "                  installed with user's PATH for Mac OS X only. See --force-env."
-    echo "  --no-home       Do not install $HOME/.emacs.el."
-    echo "  --no-backup     Do not backup $HOME/.emacs.el during install"
-    echo "                  (ignored and irrelevant if --no-home is supplied)."
+    echo "  --no-init-file  Do not install root init file (i.e., $init_file)."
+    echo "                  See also --init-file to choose an alternative file name."
+    echo "  --no-backup     Do not backup root init file ($init_file) during install"
+    echo "                  (ignored and irrelevant if --no-init-file is supplied)."
     echo "  --no-extras     Do not install extra files (Cask, themes, site-lisp)."
     echo ""
     echo "  --force-custom  Install emacs-custom.el even if it already exists in target."
@@ -92,6 +95,9 @@ usage () {
     echo "  --dry-run       Display steps but do not execute them."
     echo "  --help          Show this usage message."
     echo "  --version       Version information."
+    echo ""
+    echo "This installs all files in the standalone init/ subdirectory of target"
+    echo "and a root initialization file (default: $init_file) to be loaded first."
     echo ""
     echo "After initial installation, this starts an interactive interface through"
     echo "which the emacs init configuration and preferences can be customized."
@@ -121,7 +127,7 @@ find_homebrew () {
 is_emacs_supported() {
     if [[ -n "$emacs_x" && -x "$emacs_x" ]]; then
         emacs_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+)\.([0-9]+).*$/\1.\2/;2,$d')
-        emacs_major_version=$($emacs_x --version | sed -E '1s/GNU Emacs ([0-9]+).*$/\1/;2,$d')
+        emacs_major_version=$(echo "$emacs_version" | sed -E 's/^[^0-9]*([0-9]+)([^0-9].*)?$/\1/;')
         if (( $emacs_major_version > $min_emacs_version )); then
             return 0
         else
@@ -235,7 +241,7 @@ while [ "$1" != "" ]; do
         --no-env)
             no_env='true'
             ;;
-        --no-home)
+        --no-init-file)
             no_init='true'
             ;;
         --no-backup)
@@ -291,6 +297,9 @@ while [ "$1" != "" ]; do
                             ;;
                     esac
                     ;;
+                --init-file)
+                    init-file="$value"
+                    ;;
                 *)
                     echo "$0 ERROR: unknown parameter \"$param\""
                     echo ""
@@ -329,8 +338,8 @@ if [[ -n "$safe" ]]; then
          exit 1
     fi
 else
-    tmp_myenv=$target/my-env.el
-    tmp_emacs=$HOME/.emacs.el
+    tmp_myenv="$target/my-env.el"
+    tmp_emacs="$init_file"
 fi
 
 # Scan environment
@@ -359,15 +368,15 @@ if [[ -n "$dry_run" || -n "$verbose" ]]; then
         [[ -n "$safe" ]] && echo "cp $safe $tmp_myenv $target/my-env.el"
     fi
     if [[ -z "$no_init" ]]; then
-        if [[ -z "$no_backup" && -e "$HOME/.emacs.el" ]]; then
-            echo "cp $safe $HOME/.emacs.el $HOME/.emacs.el.backup"
+        if [[ -z "$no_backup" && -e "$init_file" ]]; then
+            echo "cp $safe \"$init_file\" \"${init_file}.backup\""
         fi
         if [[ "$package_in" == "$package_out" ]]; then
             echo "cat Extras/home-dot-emacs.el | sed 's:TARGET:$abs_target:' > $tmp_emacs"
         else
             echo "cat Extras/home-dot-emacs.el | sed 's/$package_in/$package_out/;s:TARGET:$abs_target:' > $tmp_emacs"
         fi
-        [[ -n "$safe" ]] && echo "cp $safe $tmp_emacs $HOME/.emacs.el"
+        [[ -n "$safe" ]] && echo "cp $safe \"$tmp_emacs\" \"$init_file\""
     fi
 fi
 
@@ -393,15 +402,15 @@ if [[ -z "$dry_run" ]]; then
         [[ -n "$safe" ]] && cp $safe $tmp_myenv $target/my-env.el
     fi
     if [[ -z "$no_init" ]]; then
-        if [[ -z "$no_backup" && -e "$HOME/.emacs.el" ]]; then
-            cp $safe $HOME/.emacs.el $HOME/.emacs.el.backup
+        if [[ -z "$no_backup" && -e "$init_file" ]]; then
+            cp $safe "$init_file" "${init_file}.backup"
         fi
         if [[ "$package_in" = "$package_out" ]]; then
             cat Extras/home-dot-emacs.el | sed "s:TARGET:$abs_target:" > $tmp_emacs
         else
             cat Extras/home-dot-emacs.el | sed "s/$package_in/$package_out/;s:TARGET:$abs_target:" > $tmp_emacs
         fi
-        [[ -n "$safe" ]] && cp $safe $tmp_emacs $HOME/.emacs.el
+        [[ -n "$safe" ]] && cp $safe "$tmp_emacs" "$init_file"
     fi
 fi  
 
@@ -452,9 +461,9 @@ fi
 echo ""
 echo "Emacs initialization now installed in $target with emacs $emacs_x."
 echo "Configuration:"
-echo "  package type: $package_label, homebrew preferred? ${use_homebrew:-false},"
+echo "  package type: $package_label, init file: $init_file, homebrew preferred? ${use_homebrew:-false},"
 echo "  emacs packages were ${no_install:+not yet }installed, and also"
-echo "  installation suppressed for ${no_custom:+custom file, }${no_env:+my-env.el, }${no_init:+HOME/emacs.el, }${no_extras:+extra files, }and"
+echo "  installation suppressed for ${no_custom:+custom file, }${no_env:+my-env.el, }${no_init:+init file, }${no_extras:+extra files, }and"
 echo "  the following options were set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run }${force_review:+--force-review }${force_env:+--force-env }${force_custom:+--force-custom}."
 echo "Next: Start up emacs and get editing..."
 

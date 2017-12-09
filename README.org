@@ -74,8 +74,16 @@ init-file configuration.
          homebrew version of cask. The auto setting attempts to
          deduce the proper package system from the availability of
          executables.
-
-      c. On Mac OS X, the =--homebrew= option indicates to prefer
+      c. The initialization files are installed in the =init=
+         sub-directory of the target directory, and a root init
+         file -- which is loaded first and loads the rest -- is
+         installed as =.emacs.el= in the user's home directory.
+         (If the file already exists, it is backed up first.)
+         The name and location of this file can be customized
+         with the option =--init-file=FILENAME=, or the root
+         file installation can be suppressed with =--no-init-file=,
+         in case one wants to customize loading.
+      d. On Mac OS X, the =--homebrew= option indicates to prefer
          the homebrew version of various tools. In particular,
          this affects which emacs is used for package installation
          and the data review step.
@@ -171,8 +179,16 @@ init-file configuration.
          to use the homebrew version of cask. The auto setting
          attempts to deduce the proper package system from
          the availability of executables.
-
-      c. On Mac OS X, the =--homebrew= option indicates to prefer
+      c. The initialization files are installed in the =init=
+         sub-directory of the target directory, and a root init
+         file -- which is loaded first and loads the rest -- is
+         installed as =.emacs.el= in the user's home directory.
+         (If the file already exists, it is backed up first.)
+         The name and location of this file can be customized
+         with the option =--init-file=FILENAME=, or the root
+         file installation can be suppressed with =--no-init-file=,
+         in case one wants to customize loading.
+      d. On Mac OS X, the =--homebrew= option indicates to prefer
          the homebrew version of various tools. In particular,
          this affects which emacs is used for package installation
          and the data review step.
