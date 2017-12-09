@@ -86,7 +86,7 @@ usage () {
     echo "                  Overrides --no-custom."
     echo "  --force-env     Install my-env.el even on non-Mac platforms."
     echo "                  Overrides --no-env."
-    echo "  --force-review  Force full review even if packages are not installed."
+    echo "  --force-review  Force full review even if --no-install is supplied."
     echo "                  Use this if the emacs packages have been pre-installed."
     echo ""
     echo "  --safe          Do not overwrite existing files where possible."
@@ -298,7 +298,7 @@ while [ "$1" != "" ]; do
                     esac
                     ;;
                 --init-file)
-                    init-file="$value"
+                    init_file="$value"
                     ;;
                 *)
                     echo "$0 ERROR: unknown parameter \"$param\""
@@ -461,9 +461,9 @@ fi
 echo ""
 echo "Emacs initialization now installed in $target with emacs $emacs_x."
 echo "Configuration:"
-echo "  package type: $package_label, init file: $init_file, homebrew preferred? ${use_homebrew:-false},"
-echo "  emacs packages were ${no_install:+not yet }installed, and also"
-echo "  installation suppressed for ${no_custom:+custom file, }${no_env:+my-env.el, }${no_init:+init file, }${no_extras:+extra files, }and"
-echo "  the following options were set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run }${force_review:+--force-review }${force_env:+--force-env }${force_custom:+--force-custom}."
+echo "  * Package type: $package_label, Root init file: $init_file, Homebrew preferred? ${use_homebrew:-false},"
+echo "  * Suppressed components: ${no_custom:+custom file, }${no_env:+my-env.el, }${no_init:+init file, }${no_backup:+root file backup, }${no_extras:+extra files}"
+echo "  * Other options set: ${safe:+--safe }${verbose:+--verbose }${dry_run:+--dry-run }${force_review:+--force-review }${force_env:+--force-env }${force_custom:+--force-custom}"
+echo "  * Emacs packages were ${no_install:+not }installed."
 echo "Next: Start up emacs and get editing..."
 

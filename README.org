@@ -11,231 +11,168 @@ init-file configuration.
 
 * Installation
 
-  This code in this repository can be installed directly in your emacss
-  initialization directory or kept separately. There are slightly
-  different steps in the two cases, as described below.
+  Running the installation script installs the initialization files
+  in a chosen target directory, along with a root initialization file
+  that is loaded first and loads the others. The main files, as
+  cloned from the github repository, must be in the =init= subdirectory
+  of the traget directory.
 
-** Method 1. Clone this repository directly into emacs initialization directory
+  The recommended method is to install the repository in your emacs
+  initialization directory (e.g., =~/.emacs.d/=). This is the default
+  expectation. But you can also install these files in a different
+  location by specifying the target directory with ~--target=DIR~
+  in what follows. Indeed, with a combination of the ~--target~ and
+  ~--init-file~ options, you can install the entire setup independently
+  of your default emacs directory.
 
-   This is the usual (and recommended) case. Take the following steps.
 
-   1. Move to your emacs initialization directory. Replace
-      '=EMACS_D_DIRECTORY'= in the following with the path to that
-      directory:
+  To install, take the following steps.
 
-      #+begin_src sh
-        cd EMACS_D_DIRECTORY
-      #+end_src
+  1. Choose your target directory and move to it.
+     In the typical case, this will be your emacs initialization
+     directory (e.g., =~/.emacs.d/=).
 
-   2. Clone this repository into a subdirectory of your
-      emacs initialization directory. 
+     Replace '=TARGET_DIRECTORY=' in the following with the path to
+     your chosen directory and enter this at the shell prompt:
 
-      #+begin_src sh
-        git clone https://github.com/genovese/emacs-init.git
-      #+end_src
+     #+begin_src sh
+       cd TARGET_DIRECTORY
+     #+end_src
+
+  2. Clone this repository.
+
+     #+begin_src sh
+       git clone https://github.com/genovese/emacs-init.git
+     #+end_src
+
+     This will create a sub-directory =emacs-init= in your target
+     directory.
       
-   3. Rename =emacs-init= to =init= in this directory.
+  3. Rename =emacs-init= to =init= in this directory.
 
-      #+begin_src sh
-        mv emacs-init init
-      #+end_src
-   4. Change to the =init= directory.
+     #+begin_src sh
+       mv emacs-init init
+     #+end_src
 
-      #+begin_src sh
-        cd init
-      #+end_src
+  4. Change to the =init= directory.
 
-   5. Run the install script. There is no need to set the =--target=
-      option as it will be correct (=..)= by default for this case.
+     #+begin_src sh
+       cd init
+     #+end_src
 
-      #+begin_src sh
-        bash Extras/Install.sh
-      #+end_src
+  5. Run the install script.
 
-      This will install the base code and all extras, including
-      overwriting =../emacs-custom.el= and =.emacs.el= in the home
-      directory. This will also install and compile the required
-      emacs packages in =../elpa= or =../.cask= (depending on the
-      setting of =--package=) These packages are needed to use this
-      emacs init-file configuration.
+     If the target directory is your emacs initialization directory,
+     there is no need to set the =--target= option as it will be
+     correct (=..)= by default for this case. Otherwise, append
+     =--target=TARGET_DIRECTORY= to what follows, where again
+     =TARGET_DIRECTORY= is replaced by the absolute path to the target
+     without a trailing '/'.
+
+     Enter the following command at the shell prompt:
+     
+     #+begin_src sh
+       bash Extras/Install.sh
+     #+end_src
+
+     This will install the base code and all extras, including
+     overwriting =../emacs-custom.el= and =.emacs.el= in the home
+     directory. This will also install and compile the required
+     emacs packages in =../elpa= or =../.cask= (depending on the
+     setting of =--package=) These packages are needed to use this
+     emacs init-file configuration.
 
 
-      The script has a variety of options; a few notable ones are:
+     The script has a variety of options; a few notable ones are:
 
-      a. =--safe= prevents ovewriting any files that already exit
-      b. =--package= sets the package system used to install the
-         emacs packages for the init file to run.
+     a. =--safe= prevents ovewriting any files that already exit
 
-         Allowed values for this option are /package/, /cask/,
-         /cask-homebrew/, or /auto/, with auto being the default. For
-         example, =--package=package= uses the package.el system. The
-         cask setting requires the ~cask~ package manager to be
-         installed, with cask-homebrew indicating to use the
-         homebrew version of cask. The auto setting attempts to
-         deduce the proper package system from the availability of
-         executables.
-      c. The initialization files are installed in the =init=
-         sub-directory of the target directory, and a root init
-         file -- which is loaded first and loads the rest -- is
-         installed as =.emacs.el= in the user's home directory.
-         (If the file already exists, it is backed up first.)
-         The name and location of this file can be customized
-         with the option =--init-file=FILENAME=, or the root
-         file installation can be suppressed with =--no-init-file=,
-         in case one wants to customize loading.
-      d. On Mac OS X, the =--homebrew= option indicates to prefer
-         the homebrew version of various tools. In particular,
-         this affects which emacs is used for package installation
-         and the data review step.
+     b. =--package= sets the package system used to install the
+        emacs packages for the init file to run.
 
-      By including the =--dry-run= flag with any set of other options,
-      you can see what the script will do without it taking any
-      action. The =--verbose= flag can also be helpful here.
+        Allowed values for this option are /package/, /cask/,
+        /cask-homebrew/, or /auto/, with auto being the default. For
+        example, =--package=package= uses the package.el system. The
+        cask setting requires the ~cask~ package manager to be
+        installed, with cask-homebrew indicating to use the
+        homebrew version of cask. The auto setting attempts to
+        deduce the proper package system from the availability of
+        executables.
+
+     c. The initialization files are installed in the =init=
+        sub-directory of the target directory, and a root init
+        file -- which is loaded first and loads the rest -- is
+        installed as =.emacs.el= in the user's home directory.
+        (If the file already exists, it is backed up first.)
+        The name and location of this file can be customized
+        with the option =--init-file=FILENAME=, or the root
+        file installation can be suppressed with =--no-init-file=,
+        in case one wants to customize loading.
+
+     d. On Mac OS X, the =--homebrew= option indicates to prefer
+        the homebrew version of various tools. In particular,
+        this affects which emacs is used for package installation
+        and the data review step.
+
+     e. By default, this script will install all the emacs
+        packages that are needed for this initialization to run,
+        using your chosen method. This can take a few minutes
+        to complete.
+
+        If you have already installed those packages or would like
+        to install those packages some other way (only do this if
+        you are know what you are doing), then you can suppress
+        package installation with the =--no-install= option. If the
+        emacs packages are /already installed/ when you run this
+        script and you give =--no-install=, you will probably want to
+        supply the =--force-review= option to get full functionality
+        from the review tool.
+
+     By including the =--dry-run= flag with any set of other options,
+     you can see what the script will do without it taking any
+     action. The =--verbose= flag can also be helpful here.
       
-      For more details and options, run the script with
-      #+begin_src sh
-        bash Extras/Install.sh --help
-      #+end_src
+     For more details and options, run the script with
+     #+begin_src sh
+       bash Extras/Install.sh --help
+     #+end_src
 
-      Note that emacs package installation can take a few
-      minutes. Progress is indicates to the terminal, with
-      additional information printed when =--verbose= is supplied.
+     Note that emacs package installation can take a few
+     minutes. Progress is indicates to the terminal, with
+     additional information printed when =--verbose= is supplied.
 
-   6. The script evokes an application (within emacs of course)
-      for personalizing some of the settings and data in
-      this configuration. This includes:
+  6. The script evokes an application (within emacs of course)
+     for personalizing some of the settings and data in
+     this configuration. This includes:
       
-      + Editing the preferences data in the file =data/preferences.el,=
-        to reflect your personal settings. The most important
-        settings to change are =user-home-page=, =user-email-address=,
-        =shell=, and =theme-function=. Simply edit the values for each
-        key, as instructed in the application.
+     + Editing the preferences data in the file =data/preferences.el,=
+       to reflect your personal settings. The most important
+       settings to change are =user-home-page=, =user-email-address=,
+       =shell=, and =theme-function=. Simply edit the values for each
+       key, as instructed in the application.
 
-      + Editing the customization settings in =emacs-custom.el=. The
-        application lists the variables and faces in the custom
-        file, showing the current setting, and giving a button to
-        push to open a customization buffer for that setting. View
-        and change the settings as you like, hitting the 'Apply and
-        Save' button in the respective customization buffers. This
-        will set these values for future emacs sessions.
+     + Editing the customization settings in =emacs-custom.el=. The
+       application lists the variables and faces in the custom
+       file, showing the current setting, and giving a button to
+       push to open a customization buffer for that setting. View
+       and change the settings as you like, hitting the 'Apply and
+       Save' button in the respective customization buffers. This
+       will set these values for future emacs sessions.
 
-      + Viewing some tutorial information about the configuration.
+     + Viewing some tutorial information about the configuration.
 
-      When complete, hit the 'All Done' button, and the Install
-      script will continue. If the emacs packages are not
-      installed, the customization portion of the review step
-      will have reduced functionality. If emacs packages have
-      been pre-installed, supply the =--force-review= flag to
-      get the full customization review.
+     When complete, hit the 'All Done' button, and the Install
+     script will continue. If the emacs packages are not
+     installed, the customization portion of the review step
+     will have reduced functionality. If emacs packages have
+     been pre-installed, supply the =--force-review= flag to
+     get the full customization review.
 
-** Method 2. Keeping this repository separate from an active emacs init directory
 
-   In some cases, you may want to keep this repository separate
-   from your active emacs initialization directory. The installation
-   is similar to the above.
-
-   1. Clone this repository in a location of your choosing.
-      Move to the the super-directory of choice and do
-
-      #+begin_src sh
-        git clone https://github.com/genovese/emacs-init.git
-      #+end_src
-
-   2. Change to the =emacs-init= directory.
-
-      #+begin_src sh
-        cd emacs-init
-      #+end_src
-
-   3. Run the install script with ~--target~ set to your emacs
-      initialization directory, for instance =~/.emacs.d=., with
-
-      #+begin_src sh
-        bash Extras/Install.sh --target=~/.emacs.d --full
-      #+end_src
-
-      where you should replace ``~/.emacs.d'' with whatever
-      directory contains the relevant =init=.
-
-      This will install the base code and all extras, including
-      overwriting =emacs-custom.el= in the target directory and
-      =.emacs.el= in the home directory. This will also install and
-      compile the emacs packages in the =elpa= or =.cask= (depending on
-      the =--package= setting) subdirectory of the target directory.
-      These packages are needed to use this emacs init-file
-      configuration.
-
-      The script has a variety of options; a few notable ones are:
-
-      a. =--safe= prevents ovewriting any files that already exit
-      b. =--package= sets the package system used to install the
-         emacs packages for the init file to run.
-
-         Allowed values for this option are /package/, /cask/, 
-         /cask-homebrew/, or /auto/, with auto being the default.
-         For example, =--package=package= uses the package.el
-         system. The cask setting requires the ~cask~ package
-         manager to be installed, with cask-homebrew indicating
-         to use the homebrew version of cask. The auto setting
-         attempts to deduce the proper package system from
-         the availability of executables.
-      c. The initialization files are installed in the =init=
-         sub-directory of the target directory, and a root init
-         file -- which is loaded first and loads the rest -- is
-         installed as =.emacs.el= in the user's home directory.
-         (If the file already exists, it is backed up first.)
-         The name and location of this file can be customized
-         with the option =--init-file=FILENAME=, or the root
-         file installation can be suppressed with =--no-init-file=,
-         in case one wants to customize loading.
-      d. On Mac OS X, the =--homebrew= option indicates to prefer
-         the homebrew version of various tools. In particular,
-         this affects which emacs is used for package installation
-         and the data review step.
-
-      By including the =--dry-run= flag with any set of other options,
-      you can see what the script will do without it taking any
-      action. The =--verbose= flag can also be helpful here.
-      
-      For more details and options, run the script with
-      #+begin_src sh
-        bash Extras/Install.sh --help
-      #+end_src
-
-      Note that emacs package installation can take a few
-      minutes. Progress is indicates to the terminal, with
-      additional information printed when =--verbose= is supplied.
-
-   4. The script evokes an application (within emacs of course)
-      for personalizing some of the settings and data in
-      this configuration. This includes:
-      
-      + Editing the preferences data in the file =data/preferences.el,=
-        to reflect your personal settings. The most important settings
-        to change are =user-home-page=, =user-email-address=,
-        and =shell=. Simply edit the values for each key, as instructed
-        in the application.
-
-      + Editing the customization settings in =emacs-custom.el=. The
-        application lists the variables and faces in the custom
-        file, showing the current setting, and giving a button to
-        push to open a customization buffer for that setting. View
-        and change the settings as you like, hitting the 'Apply and
-        Save' button in the respective customization buffers. This
-        will set these values for future emacs sessions.
-
-      + Viewing some tutorial information about the configuration.
-
-      When complete, hit the 'All Done' button, and the Install
-      script will continue. If the emacs packages are not
-      installed, the customization portion of the review step
-      will have reduced functionality. If emacs packages have
-      been pre-installed, supply the =--force-review= flag to
-      get the full customization review.
-
-   In this case, note that the shell script =Extras/Update.sh= allows
-   for simple updating of the Extras files (e.g., =Cask=) from the
-   working initialization directory.
+  If you maintain this config outside your emacs initialization file,
+  you might find the shell script =Extras/Update.sh= useful. It provides
+  for simple updating of the Extras files (e.g., =Cask=) from the
+  working initialization directory.
 
 ** Appendix: Install script overview
 
@@ -265,7 +202,7 @@ init-file configuration.
 * Usage Overview
 
   A few notable features are described below. See also the
-  file =Extras/tutorial.org= for some more detail; this tutorial
+  file [[file:Extras/tutorial.org][Extras/tutorial.org]] for some more detail; this tutorial
   is displayed during the review step of initialization.
 
   + Keybindings: Help
