@@ -10,8 +10,6 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#3f3f3f" "#cc9393" "#7f9f7f" "#f0dfaf" "#8cd0d3" "#dc8cc3" "#93e0e3" "#dcdccc"])
- '(ansi-term-color-vector
-   ["#3f3f3f" "#cc9393" "#7f9f7f" "#f0dfaf" "#8cd0d3" "#dc8cc3" "#93e0e3" "#dcdccc"] t)
  '(column-number-mode t)
  '(cua-mode t nil (cua-base))
  '(custom-safe-themes
@@ -41,8 +39,7 @@
  '(fci-rule-color "#383838")
  '(ibuffer-saved-filter-groups
    (quote
-    ((#("default" 0 1
-        (idx 0))
+    (("default"
       ("Org"
        (directory . "~/org/"))
       ("Teaching"
@@ -144,8 +141,7 @@
        (name . "^\\*.*\\*\\(<[0-9]+>\\)?$"))
       ("Misc"
        (name . "^\\S-")))
-     (#("all" 0 1
-        (idx 1))
+     ("all"
       ("All"
        (name . "."))))))
  '(org-export-backends (quote (ascii beamer html icalendar latex md texinfo deck)))
