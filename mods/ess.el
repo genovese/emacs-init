@@ -27,6 +27,7 @@
   (setq ess-auto-newline t)
   (setq-default ess-loop-timeout '1000000)
   (setq-default inferior-ess-help-command "help(\"%s\")\n")
+  (setq-default ess-use-ido nil) ; prefer ivy
   (setq ess-use-toolbar nil)
   (setq ess-fancy-comments nil)
   ;; Fix 06 Jun 2013 (ESS stomps on my help)
@@ -43,12 +44,13 @@
   (local-set-key "\C-c\M-p" 'comint-backward-matching-input)
   (local-set-key "\C-c\M-n" 'comint-forward-matching-input)
   ;; Comint configuration
-  (add-hook 'comint-input-filter-functions 'ess-search-path-tracker nil t)
+  (add-hook 'comint-input-filter-functions 'ess-search-path-tracker nil t) ;; deprecated?
   (setq comint-move-point-for-output 'all) ; follow output after eval or entry
   (setq input-ring-size '1024)
   ;; Style Configuration (these three lines needed?)
   (setq ess-style 'CRG) 
   (setq ess-auto-newline t)
+  (setq ess-use-ido nil) ; prefer ivy
   (ess-set-style ess-style)
   ;; General ESS config
   (setq inferior-ess-help-command "help(\"%s\")\n"))

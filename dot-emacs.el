@@ -118,7 +118,8 @@ See `set-preferences' and `get-preference'.")
               indent-tabs-mode       nil
               shift-select-mode      nil
               next-line-add-newlines nil
-              truncate-lines         t)
+              truncate-lines         t
+              indicate-empty-lines   t)
 
 (foreach (s '(tool-bar-mode scroll-bar-mode tooltip-mode delete-selection-mode))
   (if (fboundp s) (funcall s -1))) ; disable some operational modes
@@ -277,5 +278,27 @@ See `set-preferences' and `get-preference'.")
 
   ;; Allow access through emacsclient
   (server-start))
+
+
+;; Load local (user-specific) modifications
+;;
+;; If any .el or .elc exist in local/, subdirectories are added to
+;; the load path and all these files are loaded. Files beginning with
+;; '-' are excluded from this.
+;;
+;; The local directory will always be empty for me, but can be setup
+;; by other users to make whatever additional changes are desired.
+;; One approach is to mimic the thematic structure of the init directory.
+;; 
+
+(when-let* ((local-dir (locate-user-emacs-file "init/local"))
+            (_ (and (file-readable-p local-dir) (file-directory-p local-dir)))
+            (local-files (directory-files local-dir t "^[^-].*\\.el\\'")))
+  (let ((default-directory (expand-file-name local-dir)))
+    (add-to-list 'load-path default-directory)
+    (normal-top-level-add-subdirs-to-load-path))
+  (dolist (local local-files)
+    (load (file-name-sans-extension local) t)))
+
 
 ;;; dot-emacs.el ends here

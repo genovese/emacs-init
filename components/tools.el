@@ -1,14 +1,14 @@
 ;;; tools.el -- miscellaneous tools -*- lexical-binding: t; -*-
 
-(use-package my-workgroups
-  :config (progn
-            (setq wg-prefix-key "\C-cw")
-            (wg-set-prefix-key)
-            (setq wg-default-buffer "*unix*")
-            (setq wg-file "~/.emacs.d/saved-workgroups/u13a.el")
-            (setq wg-morph-on nil)
-            (wg-set-prefix-key)
-            (global-set-key "\C-cwl" 'wg-echo-all-workgroups)))
+;;(use-package my-workgroups
+;;  :config (progn
+;;            (setq wg-prefix-key "\C-cw")
+;;            (wg-set-prefix-key)
+;;            (setq wg-default-buffer "*unix*")
+;;            (setq wg-file "~/.emacs.d/saved-workgroups/u13a.el")
+;;            (setq wg-morph-on nil)
+;;            (wg-set-prefix-key)
+;;            (global-set-key "\C-cwl" 'wg-echo-all-workgroups)))
 
 (use-package calendar
   :init (progn

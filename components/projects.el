@@ -8,7 +8,7 @@
 
 (use-package projectile
   :config (progn
-            (counsel-projectile-on)
+            (counsel-projectile-mode)
             (projectile-mode 1)))
 
 

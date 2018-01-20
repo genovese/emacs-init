@@ -16,7 +16,7 @@
 (add-hook 'eval-expression-minibuffer-setup-hook #'paredit-mode)
 (add-hook 'eval-expression-minibuffer-setup-hook #'eldoc-mode)
 
-(add-hook 'view-mode-hook 'visual-line-mode) ; viewing is easier with wrapping, no editing ambiguity
+;(add-hook 'view-mode-hook 'visual-line-mode) ;viewing is easier with wrapping, no editing ambiguity
 
 (defun isearch-yank-hook ()
   (make-local-variable 'isearch-mode-map)
@@ -29,7 +29,9 @@
   (define-key view-mode-map "\C-\M-v" 'View-scroll-half-page-forward)
   (define-key view-mode-map "\M-v"    'end-of-buffer)
   (define-key view-mode-map "k"       'View-kill-and-leave)
-  (define-key view-mode-map "l"       'View-leave))
+  (define-key view-mode-map "l"       'View-leave)
+  (unless (derived-mode-p 'org-mode)
+    (visual-line-mode 1)))
 
 (add-my-hook doc-view-mode-hook
   (auto-revert-mode 1))

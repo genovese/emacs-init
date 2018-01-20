@@ -286,6 +286,16 @@ init-file configuration.
     A modified zenburn theme, zenburn+, is available
     in =Extras/themes=.
 
+  + Local Code and Modifications
+
+    The =local/= subdirectory (and the subdirectories therein) is
+    intended for user code, including code to modify or override the
+    code in this config. Any .el or .elc files in =local/= are loaded;
+    any subdirectories are added to the load path; and any .el or
+    .elc files in such subdirectories are also loaded. This happens
+    after all other code in the config is executed. Files beginning
+    with '-' are excluded from loading.
+    
 * File Manifest
 
   | File or Directory        | Description/Notes                                                       |
@@ -306,6 +316,7 @@ init-file configuration.
   | components/*.el          | Individual component loaders and configurations                         |
   | mods                     | Directory containing mode- or tool-specific modifications               |
   | mods/*.el                | Code for individual mods, arranged by tool                              |
+  | locals                   | Directory for installing local files; loaded after existing code        |
   | prototypes               | Experimental or pre-packaged code                                       |
   | prototypes/*.el          | Individual prototype modules (give file name '-' prefix to disable)     |
   | Extras                   | Directory with supplementary files to be installed in target or home    |

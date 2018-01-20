@@ -10,8 +10,8 @@
 
 (defun org-table-mark-field (&optional prefix)
   (interactive "P")
-  (unless (or prefix
-              (looking-back "| ?" (point-at-bol 0)))
+  (org-table-check-inside-data-field)
+  (unless (or prefix (looking-back "| ?" (point-at-bol 0)))
     (org-table-beginning-of-field 0))
   (push-mark
    (save-excursion

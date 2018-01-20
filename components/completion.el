@@ -45,6 +45,7 @@ When INITIAL-INPUT is non-nil, use it in the minibuffer during completion."
                ("M-v")
                ("C-w" . ivy-scroll-down-command))
     (setq ivy-wrap t)
+    (setq ivy-use-selectable-prompt t)
     (global-set-key (kbd "C-x C-f") 'counsel-find-file)
     (setq counsel-find-file-ignore-regexp "\\(?:\\`[#.]\\)\\|\\(?:[#~]\\'\\)")
     (ivy-set-actions t
