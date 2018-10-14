@@ -9,3 +9,10 @@
 *.tgz
 # Ignore compiled elisp
 *.elc
+# Ignore files in local directory except README
+/local/
+!/local/README
+# Ignore files in prototypes directory except .gitkeep
+/prototypes/
+!/prototypes/.gitkeep
+

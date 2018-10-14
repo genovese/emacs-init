@@ -10,10 +10,15 @@
             (define-key magit-mode-map [?\s-W] 'magit-copy-buffer-revision)
             (define-key magit-mode-map [?\A-W] 'magit-copy-buffer-revision)
             (define-key magit-mode-map "\M-k" 'magit-copy-item-as-kill)
+            (define-key magit-file-mode-map "\C-xg" nil)
             (add-to-list 'same-window-regexps "\\`\\*magit: ")
-            ;; NEW VERSION OF EMACS AND MAGIT  (VERSION DEPENDENT) OCT 2013
             (-when-let (client (executable-find "emacsclient"))
-              (setq magit-emacsclient-executable client))))
+              (setq magit-emacsclient-executable client))
+            (magit-define-popup-switch 'magit-log-popup ?n
+              "Show changed file name and status" "--name-status")
+            (add-to-list 'magit-log-arguments "--color")
+            (magit-define-popup-action 'magit-file-popup ?m
+              "Magit Status" 'magit-status nil t)))
 
 
 ;;; version-control.el ends here

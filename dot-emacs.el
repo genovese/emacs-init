@@ -286,9 +286,12 @@ See `set-preferences' and `get-preference'.")
 ;; the load path and all these files are loaded. Files beginning with
 ;; '-' are excluded from this.
 ;;
-;; The local directory will always be empty for me, but can be setup
-;; by other users to make whatever additional changes are desired.
-;; One approach is to mimic the thematic structure of the init directory.
+;; With the default .gitignore settings, the local directory is not
+;; tracked by git (except for the README file contained within), so
+;; it can be used for private data and for any individual
+;; personalized changes that are desired. One approach is to mimic
+;; the thematic structure of the init directory; another approach
+;; is to track it within a personal branch.
 ;; 
 
 (when-let* ((local-dir (locate-user-emacs-file "init/local"))

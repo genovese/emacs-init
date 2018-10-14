@@ -6,14 +6,16 @@
 
 ;;; AUC TeX support
 
-;; I primarily use genTeX, which is why I use `plain-TeX-mode'
-;; as the default AUCTeX mode. But the configuration below supports
-;; plain TeX, laTeX, and genTeX. The primary extension here
+;; Historically, I primarily used genTeX, which is why I used `plain-TeX-mode'
+;; as the default AUCTeX mode. But I am transitioning to LaTeX recently.
+;; Still the configuration below supports plain TeX, laTeX, and genTeX.
+;;
+;; The primary extension here
 ;; is easy functionality in `TeX-expand-list' to run
 ;; make on a target, which is a convenient for extended projects.
 
-(setq tex-default-mode 'plain-tex-mode) ;includes non AucTeX case
-(setq TeX-default-mode 'plain-TeX-mode)
+(setq tex-default-mode 'latex-mode) ;includes non AucTeX case
+(setq TeX-default-mode 'LaTeX-mode)
 (setq my-TeX-generic-setup-done nil)
 
 (defun my-generic-TeX-setup ()
@@ -26,6 +28,21 @@ AucTeX modes. Only performed once across all modes."
                                     (lambda ()
                                       (let ((targets (my/get-makefile-targets))) 
                                         (completing-read "Target: " targets)) )))
+    (defvar TeX-shell-escape-mode nil
+      "Should -shell-escape be used when processing TeX/LaTeX files?")
+    (add-to-list 'TeX-expand-list
+                 '("%(shell)" (lambda ()
+                                (if TeX-shell-escape-mode
+                                    " -shell-escape"
+                                  ""))))
+    (add-to-list 'TeX-expand-list
+                 '("%(pdfmk)" (lambda ()
+                                (if (and (eq TeX-engine 'default)
+                                         (if TeX-PDF-mode
+                                             (not (TeX-PDF-from-DVI))
+                                           TeX-DVI-via-PDFTeX))
+                                    " -pdf"
+                                  ""))))
     (cl-delete-if (lambda (item) (string-equal "Makeinfo" (car item))) TeX-command-list)
     (cl-delete-if (lambda (item) (string-equal "Makeinfo HTML" (car item))) TeX-command-list)
     (add-to-list 'TeX-command-list '("Info" "makeinfo %t" TeX-run-compile nil
@@ -36,6 +53,9 @@ AucTeX modes. Only performed once across all modes."
                                      :help "Generate PDF file"))
     (add-to-list 'TeX-command-list '("Make" "make %M " TeX-run-command t t
                                      :help "Generate with a Makefile"))
+    (add-to-list 'TeX-command-list '("Klmake" "latexmk%(pdfmk)%(shell) %s"
+                                     TeX-run-command t t
+                                     :help "Generate with LatexMk"))
     (require 'texmathp)
     (eval-after-load 'texmathp
       (progn
@@ -84,25 +104,39 @@ AucTeX modes. Only performed once across all modes."
   (setq LaTeX-default-environment "itemize"))
   
 
-(defun my-LaTeX-mode-hook ()
+(add-my-hook LaTeX-mode-hook
   "Personal configuration for LaTeX."
-  (TeX-PDF-mode 1))
+  (TeX-PDF-mode 1)
+  (add-to-list 'LaTeX-font-list '(?n "\\notable{" "}"))
+  (add-to-list 'LaTeX-font-list '(?s "\\salient{" "}"))
+  (add-to-list 'LaTeX-font-list '(?\C-v "\\Verb|" "|")))
+
+;; (defun insert-single-space (&rest args)
+;;   (insert " "))
+;;  
+;; (defun my-LaTeX-mode-hook ()
+;;   "Personal configuration for LaTeX."
+;;   (TeX-PDF-mode 1)
+;;   (add-to-list 'TeX-insert-braces-alist (cons "item" nil))
+;;   (TeX-add-symbols '("item" ["label"] insert-single-space)))
 
 (add-hook 'LaTeX-mode-hook #'highlight-attn-words)
 (add-hook 'LaTeX-mode-hook #'turn-on-tex-parser-ispell)
 (add-hook 'LaTeX-mode-hook #'turn-on-flyspell) 
-(add-hook 'LaTeX-mode-hook #'my-LaTeX-mode-hook)
+;(add-hook 'LaTeX-mode-hook #'my-LaTeX-mode-hook)
 (add-hook 'LaTeX-mode-hook #'my-generic-TeX-setup)
 (add-hook 'LaTeX-mode-hook #'LaTeX-preview-setup)
 
 (add-hook 'latex-mode-hook 'highlight-attn-words)
 (add-hook 'latex-mode-hook 'turn-on-tex-parser-ispell)
 (add-hook 'latex-mode-hook 'turn-on-flyspell) 
-(add-hook 'latex-mode-hook 'my-LaTeX-mode-hook)
 (add-hook 'latex-mode-hook 'my-generic-TeX-setup)
+;(add-hook 'latex-mode-hook 'my-LaTeX-mode-hook)
 
-(autoload 'LaTeX-environment "latex" "Make Environment Using AucTeX commands" t)
-(autoload 'LaTeX-add-environments "latex" "Add Environment Info Using AucTeX commands" t)
+(autoload 'LaTeX-environment "latex"
+  "Make Environment Using AucTeX commands" t)
+(autoload 'LaTeX-add-environments "latex"
+  "Add Environment Info Using AucTeX commands" t)
 
 (add-hook 'AmS-TeX-mode-hook 'my-generic-TeX-setup)
 

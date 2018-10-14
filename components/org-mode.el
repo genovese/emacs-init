@@ -9,7 +9,7 @@
               (setq org-startup-folded 'content) ; nil also good
               (setq org-cycle-separator-lines 2)
               (setq org-log-into-drawer t)
-              (setq org-special-ctrl-a/e t)
+              (setq org-special-ctrl-a/e 'reversed)
               (setq org-src-window-setup 'current-window) ; try 'other-frame
               (setq org-file-apps   ; not taking, perhaps move to org-mode-hook
                     '((auto-mode . emacs)
@@ -52,6 +52,7 @@
             (add-my-hook org-mode-hook
               ;; ATTN: These are in load hook, which should be right
               ;; but they didn't work last time. Check proper placement
+              (setq org-special-ctrl-a/e 'reversed)
               (setq org-todo-keywords
                     '((sequence "TODO" "WAIT" "DONE")))
               (setq org-file-apps   ; not taking, perhaps move to org-mode-hook
@@ -62,7 +63,8 @@
                       ("\\.x?html?\\'" . system)
                       ("\\.pdf\\'" . system)
                       ("\\.\\(?:png\\|jpe?g\\|gif\\|tiff?\\|bmp\\)\\'" . system)
-                      ("\\`\\(?:.*/\\)?[^.]+\\'" . emacs)))              (org-babel-do-load-languages
+                      ("\\`\\(?:.*/\\)?[^.]+\\'" . emacs)))
+              (org-babel-do-load-languages
                'org-babel-load-languages
                '((emacs-lisp . t)
                  (R . t)

@@ -140,12 +140,12 @@ linked into `minor-mode-map-alist'."
             "(|)    ; \n()"))
 
           "Movement & Navigation"
-          ("C-M-f"     paredit-forward
+          ("A-f"     paredit-forward
            ("(foo |(bar baz) quux)"
             "(foo (bar baz)| quux)")
            ("(foo (bar)|)"
             "(foo (bar))|"))
-          ("C-M-b"     paredit-backward
+          ("A-b"     paredit-backward
            ("(foo (bar baz)| quux)"
             "(foo |(bar baz) quux)")
            ("(|(foo) bar)"

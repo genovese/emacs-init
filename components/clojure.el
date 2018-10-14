@@ -30,7 +30,8 @@
             (add-to-list 'auto-mode-alist '("\\.cljs\\'"  . clojurescript-mode))))
 
 (use-package cider
-  :commands cider-jack-in
+  :commands (cider-jack-in cider-jack-in-clj cider-jack-in-cljs
+             cider-jack-in-clj&cljs)
   :config (progn
             (add-my-hook cider-repl-mode-hook
               (enable-paredit-mode)
@@ -38,6 +39,7 @@
               (local-set-key "\C-cn" 'cider-browse-ns)
               (local-set-key "\C-cN" 'cider-browse-ns-all)
               (local-set-key "\M-{" 'paredit-wrap-curly)
+              (local-set-key "\M-[" 'paredit-wrap-square)
               (local-set-key "\C-c " 'clojure-cheatsheet)
               (setq cider-popup-stacktraces t)
               (setq cider-repl-popup-stacktraces nil))
