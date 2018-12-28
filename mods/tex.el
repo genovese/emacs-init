@@ -108,7 +108,8 @@ AucTeX modes. Only performed once across all modes."
   "Personal configuration for LaTeX."
   (TeX-PDF-mode 1)
   (add-to-list 'LaTeX-font-list '(?n "\\notable{" "}"))
-  (add-to-list 'LaTeX-font-list '(?s "\\salient{" "}"))
+  (add-to-list 'LaTeX-font-list '(?s "\\strong{" "}"))
+  (add-to-list 'LaTeX-font-list '(?S "\\salient{" "}"))
   (add-to-list 'LaTeX-font-list '(?\C-v "\\Verb|" "|")))
 
 ;; (defun insert-single-space (&rest args)

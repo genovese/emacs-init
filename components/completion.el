@@ -29,6 +29,26 @@ When INITIAL-INPUT is non-nil, use it in the minibuffer during completion."
             :keymap counsel-find-file-map
             :caller 'counsel-find-file-read-only))
 
+(defun counsel-insert-file-action (x)
+  "Find file X."
+  (with-ivy-window
+    (insert-file-contents (expand-file-name x ivy--directory))))
+
+(defun counsel-insert-file (&optional initial-input)
+  "Forward to `inisert-file'.
+     When INITIAL-INPUT is non-nil, use it in the minibuffer during completion."
+  (interactive)
+  (ivy-read "Insert file: " #'read-file-name-internal
+            :matcher #'counsel--find-file-matcher
+            :initial-input initial-input
+            :action #'counsel-insert-file-action
+            :preselect (counsel--preselect-file)
+            :require-match 'confirm-after-completion
+            :history 'file-name-history
+            :keymap counsel-find-file-map
+            :caller 'counsel-insert-file))
+
+
 ;; Completion packages
 
 (use-package company
@@ -46,7 +66,9 @@ When INITIAL-INPUT is non-nil, use it in the minibuffer during completion."
                ("C-w" . ivy-scroll-down-command))
     (setq ivy-wrap t)
     (setq ivy-use-selectable-prompt t)
+    ;(setq ivy-extra-directories '("../"))  ; without ./ just return opens parent
     (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+    (global-set-key (kbd "C-x C-i") 'counsel-insert-file)
     (setq counsel-find-file-ignore-regexp "\\(?:\\`[#.]\\)\\|\\(?:[#~]\\'\\)")
     (ivy-set-actions t
                      '(("y" ivy-yank-action "yank")))

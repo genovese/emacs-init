@@ -27,7 +27,12 @@
             (add-hook 'clojure-mode-hook 'enable-paredit-mode)
             (add-hook 'clojure-mode-hook 'fci-mode)
             (add-to-list 'auto-mode-alist '("\\.clj[xc]?\\'"  . clojure-mode))
-            (add-to-list 'auto-mode-alist '("\\.cljs\\'"  . clojurescript-mode))))
+            (add-to-list 'auto-mode-alist '("\\.cljs\\'"  . clojurescript-mode))
+
+            (define-clojure-indent
+              ;; midje
+              (facts 1)
+              (fact 1))))
 
 (use-package cider
   :commands (cider-jack-in cider-jack-in-clj cider-jack-in-cljs

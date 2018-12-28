@@ -549,8 +549,8 @@ Use this with care.
   (define-key dired-mode-map "M"        'dired-do-rename)
   (define-key dired-mode-map "N"        'find-name-dired)
   (define-key dired-mode-map "R"        'my/dired-rename-file-from-elsewhere)
-  (define-key dired-mode-map "V"        'my/dired-move-to-last-file) ; should be "v" but that's life
-  (define-key dired-mode-map "W"        'browse-url-of-dired-file)
+  (define-key dired-mode-map "V"        'browse-url-of-dired-file) ; should be "u" but that's life
+  (define-key dired-mode-map "W"        'my/dired-move-to-last-file) 
   (define-key dired-mode-map "%p"       'my/dired-mark-files-path-regexp) ; consider %m instead
   (define-key dired-mode-map "%F"       'find-dired)
   (define-key dired-mode-map "%G"       'find-grep-dired)
@@ -585,7 +585,17 @@ Use this with care.
   (define-key dired-mode-map "\M-sf"    'dired-isearch-filenames)
   (define-key dired-mode-map "\M-sx"    'dired-isearch-filenames-regexp)
   (define-key dired-mode-map [?\C-\M--] 'my/dired-change-listing-switches)
-  (define-key dired-mode-map "\C-c\C-f" 'find-file-in-project))
+  (define-key dired-mode-map "\C-c\C-f" 'find-file-in-project)
+  (cl-macrolet ((by-five (cmd)          ; Move more quickly
+                         `(lambda ()
+                            (interactive)
+                            (ignore-errors (,cmd 5)))))
+    (if (eq 'diredp-next-line (lookup-key dired-mode-map "n"))
+        (progn 
+          (define-key dired-mode-map (kbd "C-S-n") (by-five diredp-next-line))
+          (define-key dired-mode-map (kbd "C-S-p") (by-five diredp-previous-line)))
+      (define-key dired-mode-map (kbd "C-S-n") (by-five dired-next-line))
+      (define-key dired-mode-map (kbd "C-S-p") (by-five dired-previous-line)))))
 
 (defun my/diredp-default-faces ()
   "Dired-Plus faces for standard Emacs theme."
