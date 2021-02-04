@@ -1,15 +1,12 @@
 ;;; dot-emacs.el --- main emacs initialization file -*- lexical-binding: t; -*-
 
 ;; Author: Christopher Genovese <genovese@cmu.edu>
-;; Version: 2.4.2
+;; Version: 2.4.3
 
 ;;; Commentary
 ;;  This file is designed to be loaded from a higher-level entry point.
 ;;  The entry script is responsible for initializing the package system,
-;;  either directly, as with
-;;      (require 'package)
-;;      (package-initialize)
-;;  or through cask.
+;;  either directly, or through cask.
 
 ;;; Code
 
@@ -277,7 +274,11 @@ See `set-preferences' and `get-preference'.")
       (delete-other-windows)))
 
   ;; Allow access through emacsclient
-  (server-start))
+  (require 'server)
+  (when (server-running-p)
+    (setq confirm-kill-emacs #'yes-or-no-p)
+    (server-start)
+    (global-set-key (kbd "C-x C-3") 'server-edit)))
 
 
 ;; Load local (user-specific) modifications

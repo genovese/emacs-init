@@ -1,7 +1,8 @@
 ;;; common-lisp.el -- Common Lisp editing and tools -*- lexical-binding: t; -*-
 
 (add-hook 'lisp-mode-hook 'enable-paredit-mode t)
-(add-hook 'lisp-mode-hook 'fci-mode t)
+(when (< emacs-major-version 27)
+  (add-hook 'lisp-mode-hook 'fci-mode t))
 
 (add-my-hook lisp-mode-hook
   "Lisp with slime"

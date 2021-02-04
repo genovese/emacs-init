@@ -2,7 +2,7 @@
 ;; This must come before configuration of installed packages.
 (let ((package-system :package))
   (cond
-   ((eq package-system :package)
+   ((and (< emacs-major-version 27) (eq package-system :package))
     (package-initialize))
    ((eq package-system :cask)
     (require 'cask "~/.cask/cask.el")

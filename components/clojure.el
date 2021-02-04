@@ -25,9 +25,11 @@
             (add-hook 'clojure-mode-hook 'column-number-mode)
             ;; Done elsewhere, but doesn't hurt to do here either
             (add-hook 'clojure-mode-hook 'enable-paredit-mode)
-            (add-hook 'clojure-mode-hook 'fci-mode)
-            (add-to-list 'auto-mode-alist '("\\.clj[xc]?\\'"  . clojure-mode))
+            (when (< emacs-major-version 27)
+              (add-hook 'clojure-mode-hook 'fci-mode))
+            (add-to-list 'auto-mode-alist '("\\.cljx?\\'"  . clojure-mode))
             (add-to-list 'auto-mode-alist '("\\.cljs\\'"  . clojurescript-mode))
+            (add-to-list 'auto-mode-alist '("\\.cljc\\'"  . clojurec-mode))
 
             (define-clojure-indent
               ;; midje
@@ -48,6 +50,7 @@
               (local-set-key "\C-c " 'clojure-cheatsheet)
               (setq cider-popup-stacktraces t)
               (setq cider-repl-popup-stacktraces nil))
+            (define-key cider-docview-mode-map "d" #'cider-doc) ; ATTN right place?
             (add-hook 'cider-repl-mode-hook 'company-mode)
             (add-hook 'cider-repl-mode-hook 'eldoc-mode)
             (add-hook 'cider-interaction-mode-hook 'company-mode)

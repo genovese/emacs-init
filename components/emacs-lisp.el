@@ -24,7 +24,8 @@
 (add-hook 'emacs-lisp-mode-hook 'isearch-yank-hook)
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
-(add-hook 'emacs-lisp-mode-hook 'fci-mode)
+(when (< emacs-major-version 27)
+  (add-hook 'emacs-lisp-mode-hook 'fci-mode))
 (add-hook 'emacs-lisp-mode-hook 'company-mode)
 
 (font-lock-add-keywords 'emacs-lisp-mode

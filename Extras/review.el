@@ -350,7 +350,7 @@ in the home directory or in its homebrew location."
       (cask-initialize))
      (t
       (setq package-user-dir (expand-file-name "elpa" user-emacs-directory))
-      (package-initialize)))
+      (when (< emacs-major-version 27) (package-initialize))))
     (load-file "init/dot-emacs.el")
     (dolist (package review-packages-custom-needs)
       (require package nil t))

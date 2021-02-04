@@ -113,8 +113,9 @@
 (define-key my/go-map "g"      'goto-line)
 (define-key my/go-map "\M-g"   'goto-line)
 (define-key my/go-map "h"      'help-command)
-(define-key my/go-map "m"      'magit-status)        ; package dependence
-(define-key my/go-map "w"      'helm-google-suggest) ; package dependence
+(define-key my/go-map "m"      'magit-status)         ; package dependence
+(define-key my/go-map "M"      'magit-dispatch-popup) ; package dependence
+(define-key my/go-map "w"      'helm-google-suggest)  ; package dependence
 (define-key my/go-map "n"      'next-error)
 (define-key my/go-map "\M-n"   'next-error)
 (define-key my/go-map "o"      'org-open-at-point)
@@ -134,6 +135,7 @@
 (define-prefix-command 'my-search-prefix 'my-search-map
   "Search")
 (define-key my-search-map "a" 'ack)
+(define-key my-search-map "d" 'deadgrep)
 (define-key my-search-map "g" 'ag)
 (define-key my-search-map "h" 'helm)
 (define-key my-search-map "o" 'helm-occur)
@@ -292,6 +294,19 @@
   (global-set-key event 'help-command)) 
 
 (with-eval-after-load 'help
+  (progn
+    (define-prefix-command 'my/helpful-prefix 'my/helpful-map
+      "Keys for getting help with the Helpful package")
+    (define-key my/helpful-map "c" 'helpful-command)
+    (define-key my/helpful-map "f" 'helpful-function)
+    (define-key my/helpful-map "k" 'helpful-key)
+    (define-key my/helpful-map "l" 'helpful-callable)
+    (define-key my/helpful-map "m" 'helpful-macro)
+    (define-key my/helpful-map "p" 'helpful-at-point)
+    (define-key my/helpful-map "s" 'helpful-symbol)
+    (define-key my/helpful-map "v" 'helpful-variable))
+
+  ;; My new help bindings, especially my/help-goto-help.
   (bind-keys :map help-map
     ("C-c"   . describe-key-briefly)
     ("M-c"   . describe-copying)
@@ -299,6 +314,7 @@
     ("f"     . counsel-describe-function)
     ("F"     . counsel-describe-face)
     ("C-f"   . counsel-describe-face)
+    ("h"     . my/helpful-prefix)
     ("I"     . Info-goto-emacs-command-node) ; for help-mode consistency
     ("M-i"   . describe-input-method) ; not often needed
     ("T"     . describe-text-properties) 

@@ -46,9 +46,9 @@
     ("s" mc/mark-all-symbols-like-this :exit t)
     ("<" mc/mark-sgml-tag-pair :exit t)
     ("r" mc/mark-all-in-region-regexp :exit t)
-    ("l" mc/edit-lines :exit t)
-    ("b" mc/edit-beginnings-of-lines :exit t)
-    ("e" mc/edit-ends-of-lines :exit t)
+    ("l" mc/edit-lines)  ; :exit t causes failure here (why??)
+    ("b" mc/edit-beginnings-of-lines) ; :exit t causes failure here
+    ("e" mc/edit-ends-of-lines) ; :exit t causes failure here
     ("#" mc/insert-numbers)
     ("z" mc/insert-letters)
     ("o" mc/mark-pop)

@@ -178,7 +178,7 @@ from `init/priority-packages' put first."
                                         directory-file-name))
         user-emacs-directory      (file-name-directory
                                    (expand-file-name "./" install-dir)))
-  (package-initialize)
+  (when (< emacs-major-version 27) (package-initialize))
   (unless package-archive-contents
     (package-refresh-contents))
   (thread-first (or cask-file

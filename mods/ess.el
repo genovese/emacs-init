@@ -1,43 +1,84 @@
 ;;; ESS-mode for R, S, Julia
 
-;; Formatting Style 
+;; Brace Handling
 
-(setq ESS-crg-style '(CRG (ess-indent-offset . 4)
+;; ATTN: this is not used yet
+(defcustom ess-electric-brace-newline '(after . before)
+  "Non-nil means automatically newline before and after braces
+inserted in S code."
+  :type '(cons (choice (const before) (const before) (const t))
+               (choice (const before) (const before) (const t)))
+  :group 'ess-edit)
+
+(defun ess-electric-brace (&optional literal)
+  "Inserts properly indented and spaced brace pair."
+  (interactive "P")
+  (if literal
+      (self-insert-command (if (integerp literal) literal 1))
+    (when (not (eq (char-syntax (char-before)) ?\ ))
+      (insert " "))
+    (let ((pt (point))
+          (skeleton-pair t)
+          (skeleton-pair-alist '((?\{ "\n" > _ "\n" > ?\}))))
+      (skeleton-pair-insert-maybe nil)
+      (goto-char pt)
+      (ess-indent-exp)
+      (forward-char 2)
+      (ess-indent-command))))
+
+;; Formatting Style 
+;;
+;; CRG and OWN (set in emacs-custom.el) are set to be equivalent initially.
+;; Modify OWN for in-session alteration of the indentation style.
+
+(setq ess-crg-style '(CRG (ess-indent-offset . 4)
                           (ess-offset-arguments . open-delim)
-                          (ess-offset-arguments-newline . open-delim)
-                          (ess-offset-block . prev-call)
+                          (ess-offset-arguments-newline . prev-call)
+                          (ess-offset-block . open-delim)
                           (ess-offset-continued . straight)
                           (ess-align-nested-calls "ifelse")
                           (ess-align-arguments-in-calls "function[ 	]*(")
                           (ess-align-continuations-in-calls . t)
-                          (ess-align-blocks control-flow fun-decl)
+                          (ess-align-blocks control-flow)
                           (ess-indent-from-lhs arguments fun-decl-opening)
-                          (ess-indent-from-chain-start . t)
+                          (ess-indent-from-chain-start . nil)
                           (ess-indent-with-fancy-comments . nil)
                           (ess-auto-newline . t)
                           (ess-tab-always-indent . t)))
 
+(defun ess-add-crg-style (&optional default)
+  "Add CRG style to `ess-style-alist' and if `default' make it the default style."
+  (unless (assoc 'CRG ess-style-alist)
+    (push ess-crg-style ess-style-alist))
+  (when default
+    (setq ess-default-style 'CRG))
+  'CRG)
+
+
 ;; Hooks
 
-(add-my-hook ess-mode-load-hook
-  (if (not (assoc 'CRG ess-style-alist))
-      (setq ess-style-alist (cons ESS-crg-style ess-style-alist)))
-  (setq ess-default-style 'CRG)
-  (setq ess-style 'CRG)
-  (setq ess-auto-newline t)
-  (setq-default ess-loop-timeout '1000000)
-  (setq-default inferior-ess-help-command "help(\"%s\")\n")
-  (setq-default ess-use-ido nil) ; prefer ivy
+(add-my-hook ess-mode-hook
+  ;; ESS style configuration
+  (ess-add-crg-style :default)
+  (ess-set-style 'CRG)
+  ;; ESS configuration
+  (setq-default ess-use-ido nil)        ; prefer ivy
   (setq ess-use-toolbar nil)
   (setq ess-fancy-comments nil)
-  ;; Fix 06 Jun 2013 (ESS stomps on my help)
-  ;; ess-mode-map maps "\M-\C-h" to ess-mark-function
-  ;; which causes problems with my help setup
-  ;; Unset the key in ess-mode-map and set C-cf to ess-mark-function
-  (define-key ess-mode-map "\M-\C-h" nil)
-  (define-key ess-mode-map "\C-cf" 'ess-mark-function))
+  (setq ess-assign-list '(" <- " " = " " <<- " " -> " " ->> "))
+  ;; Key bindings -- ESS stomps on my help key
+  (define-key ess-mode-map "{" 'ess-electric-brace)
+  (define-key ess-mode-map "\M-\C-h" nil) ; ESS stomps on my help key
+  (define-key ess-mode-map (kbd "A-h") 'ess-mark-function-or-para)
+  (define-key ess-mode-map (kbd "C-h") 'ess-mark-function-or-para))
 
 (add-my-hook inferior-ess-mode-hook
+  ;; Style Configuration
+  (ess-add-crg-style :default)
+  (ess-set-style 'CRG)
+  ;; General ESS config
+  ;(setq ess-auto-newline t)
+  (setq ess-use-ido nil) ; prefer ivy
   ;; Key bindings
   (local-set-key "\C-d" 'delete-char)
   (local-set-key "\C-a" 'my/comint-bol)
@@ -46,31 +87,20 @@
   ;; Comint configuration
   (add-hook 'comint-input-filter-functions 'ess-search-path-tracker nil t) ;; deprecated?
   (setq comint-move-point-for-output 'all) ; follow output after eval or entry
-  (setq input-ring-size '1024)
-  ;; Style Configuration (these three lines needed?)
-  (setq ess-style 'CRG) 
-  (setq ess-auto-newline t)
-  (setq ess-use-ido nil) ; prefer ivy
-  (ess-set-style ess-style)
-  ;; General ESS config
-  (setq inferior-ess-help-command "help(\"%s\")\n"))
+  (setq input-ring-size '1024))
 
 (add-my-hook ess-pre-run-hook
-  (progn
-    (remove-hook 'ess-mode-hook             'turn-on-font-lock)
-    (remove-hook 'ess-transcript-mode-hoonk 'turn-on-font-lock)
-    (remove-hook 'inferior-ess-mode-hook    'turn-on-font-lock)))
+  (ess-add-crg-style :default))
 
-(add-my-hook ess-mode-hook
-  (setq ess-style 'CRG)
-  (setq ess-auto-newline t)
-  (ess-set-style ess-style))
+;;; Was in ess-pre-run-hook but can't remember why
+;;(progn
+;;    (remove-hook 'ess-mode-hook             'turn-on-font-lock)
+;;    (remove-hook 'ess-transcript-mode-hoonk 'turn-on-font-lock)
+;;    (remove-hook 'inferior-ess-mode-hook    'turn-on-font-lock))
 
 (add-my-hook ess-transcript-mode-hook
-  (setq ess-style 'CRG)
-  (setq ess-auto-newline t)
-  (ess-set-style ess-style))
-
-;; (setq ess-style-alist (cons ESS-crg-style ess-style-alist)) ;;  needed?
+  ;; Style Configuration
+  (ess-add-crg-style :default)
+  (ess-set-style 'CRG))
 
 

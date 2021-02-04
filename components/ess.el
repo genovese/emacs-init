@@ -3,24 +3,20 @@
 (use-package ess
   :defer t
   :init (progn
-          (unless (boundp 'ess-S-assign)
-            (defvar ess-S-assign "<- "
-              "Deprecated variable holding default assignment operator string"))
-          (setq ess-R-smart-operators t) ; smart commas only for now
-          (autoload 'R-mode "ess-site"
-            "Major mode for editing R source.  See `ess-mode' for more help."
-            t))
-  :config (progn
-            (eval-after-load 'ess-smart-equals
-              '(progn
-                 (add-hook 'ess-mode-hook 'ess-smart-equals-mode)
-                 (add-hook 'inferior-ess-mode-hook 'ess-smart-equals-mode)))
-            (require 'ess-smart-equals nil t)
-            (define-key ess-mode-map "\C-\M-h" nil)
-            (define-key ess-mode-map (kbd "A-h") 'ess-mark-function-or-para)))
+          ;; smart commas only for now
+          (setq ess-R-smart-operators t)) 
+  :config (with-eval-after-load 'ess-r-mode
+            (define-key ess-r-mode-map (kbd "C-h") nil)
+            (define-key ess-r-mode-map (kbd "M-C-h") nil)
+            (define-key ess-r-mode-map (kbd "C-c SPC") 'ess-mark-function-or-para)))
 
+(use-package ess-smart-equals
+  :init   (setq ess-smart-equals-extra-ops '(brace paren percent))
+  :after  (:any ess-r-mode inferior-ess-r-mode ess-r-transcript-mode)
+  :config (ess-smart-equals-activate))
 
 (use-package julia-mode
-  :mode "\\.jl\\'")
+  :mode "\\.jl\\'"
+  :defer t)
 
 ;;; ess.el ends here

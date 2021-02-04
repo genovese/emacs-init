@@ -14,9 +14,10 @@
   :init (progn
           (load-local 'calendar :mods)
           (use-package astronomy :config (load-local 'astronomy :mods)))
-  :config (setq calendar-font-lock-keywords ; Change how weekends are highlighted 
-                (cl-subst 'font-lock-keyword-face 'font-lock-comment-face
-                       calendar-font-lock-keywords)))
+  ;;:config (setq calendar-font-lock-keywords ; Change how weekends are highlighted 
+  ;;              (cl-subst 'font-lock-keyword-face 'font-lock-comment-face
+  ;;                     calendar-font-lock-keywords))
+  )
 
 (use-package undo-tree
   :defer t)
@@ -29,8 +30,8 @@
   :config
   (custom-set-variables
    '(pdf-tools-handle-upgrades nil)) ; Use brew upgrade pdf-tools instead.
-  (setq pdf-info-epdfinfo-program "/usr/local/bin/epdfinfo"))
-;;(pdf-tools-install) ;; need to do this once
+  (setq pdf-info-epdfinfo-program "/usr/local/bin/epdfinfo")
+  (pdf-tools-install))
 
 
 ;;; tools.el ends here

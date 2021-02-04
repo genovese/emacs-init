@@ -9,7 +9,8 @@
   ;(local-set-key "\M-\C-a"  'beginning-of-python-def-or-class)
   (local-set-key [(control ?\;)] 'comment-indent-new-line))
 
-(add-hook 'python-mode-hook 'fci-mode t)
+(when (< emacs-major-version 27)
+  (add-hook 'python-mode-hook 'fci-mode t))
 
 (with-eval-after-load 'elpy
   (remove-hook 'elpy-modules 'elpy-module-flymake)
