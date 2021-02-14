@@ -6,9 +6,16 @@
             (setq win-switch-other-window-first nil)
             (setq win-switch-window-threshold 1)))
 
-(use-package ace-jump-mode
-  :bind ("C-." . ace-jump-mode)
-  :config (bind-key "C-," 'ace-jump-mode-pop-mark)) ;;ATTN: maybe temporary
+(use-package avy
+  :bind (("C-." . avy-goto-char-timer)
+         ("C-:" . avy-goto-char-2)
+         ("M-g g" . avy-goto-line)  ;; delegates to goto-line with a digit
+         ("C-," . avy-goto-word-1)
+         ))
+
+;;(use-package ace-jump-mode
+;;  :bind ("C-." . ace-jump-mode)
+;;  :config (bind-key "C-," 'ace-jump-mode-pop-mark)) ;;ATTN: maybe temporary
 
 (use-package expand-region
   :bind (("C-="   . er/expand-region)

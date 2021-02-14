@@ -57,23 +57,63 @@ When INITIAL-INPUT is non-nil, use it in the minibuffer during completion."
             (bind-key "C-d" 'company-show-doc-buffer company-active-map)
             (bind-key [(control return)] 'company-show-location company-active-map)))
 
+(defun ivy-directory-from-last-kill ()
+  "Replace current directory with copy of last kill when completing file names."
+  ;; ATTN: this can be extended in a number of ways; e.g., cycle through directory stack or history
+  (interactive)
+  (let* ((last-kill (substring-no-properties (current-kill 0 t))))
+    (when (f-directory? last-kill)
+      (ivy--cd (file-name-as-directory last-kill)))))
+
+(use-package all-the-icons)
+
 (use-package ivy
+  :bind (("C-c C-r" . ivy-resume)
+         ("C-c 8" . counsel-unicode-char)
+         ("C-c v" . ivy-push-view)
+         ("C-c V" . ivy-pop-view)
+         ("M-y" . counsel-yank-pop)
+         ("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("C-x C-i" . counsel-insert-file))
   :config
   (progn
-    (bind-key "M-x" 'counsel-M-x)
     (bind-keys :map ivy-minibuffer-map
                ("M-v")
                ("C-w" . ivy-scroll-down-command))
     (setq ivy-wrap t)
     (setq ivy-use-selectable-prompt t)
-    ;(setq ivy-extra-directories '("../"))  ; without ./ just return opens parent
-    (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-    (global-set-key (kbd "C-x C-i") 'counsel-insert-file)
-    (setq counsel-find-file-ignore-regexp "\\(?:\\`[#.]\\)\\|\\(?:[#~]\\'\\)")
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
     (ivy-set-actions t
                      '(("y" ivy-yank-action "yank")))
+    ;;(setq ivy-extra-directories '("../"))  ; without ./ just return opens parent
+    (use-package counsel)
+    (use-package swiper)
+    ;;(bind-key "M-x" 'counsel-M-x)
+    ;;(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+    ;;(global-set-key (kbd "C-x C-i") 'counsel-insert-file)
+    (setq counsel-find-file-ignore-regexp "\\(?:\\`[#.]\\)\\|\\(?:[#~]\\'\\)")
+    (define-key counsel-find-file-map (kbd "C-SPC") 'ivy-directory-from-last-kill)
     (use-package ivy-hydra)
     (ivy-mode 1)))
+
+(use-package prescient
+  :after (counsel ivy))
+
+(use-package ivy-prescient
+  :after (prescient ivy))
+
+(use-package all-the-icons-ivy
+  :init (add-hook 'after-init-hook 'all-the-icons-ivy-setup))
+
+(use-package all-the-icons-ivy-rich
+  :init (all-the-icons-ivy-rich-mode 1))
+
+(use-package ivy-rich
+  :after (ivy all-the-icons-ivy-rich)
+  :hook (ivy-mode . ivy-rich-mode)
+  :init (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
 
 (use-package helm
   :config (progn

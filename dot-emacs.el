@@ -275,7 +275,7 @@ See `set-preferences' and `get-preference'.")
 
   ;; Allow access through emacsclient
   (require 'server)
-  (when (server-running-p)
+  (unless (server-running-p)
     (setq confirm-kill-emacs #'yes-or-no-p)
     (server-start)
     (global-set-key (kbd "C-x C-3") 'server-edit)))
