@@ -3,6 +3,7 @@
 ;; Fonts
 
 (defun my/org-font-settings ()
+  (interactive)
   (set-face-attribute 'default nil
                       :font "Fira Mono"
                       :height 140)
@@ -15,45 +16,45 @@
                       :weight 'regular))
 
 ;; Unicode Glyph Support
-
-(defun dw/replace-unicode-font-mapping (block-name old-font new-font)
-  (let* ((block-idx (cl-position-if
-                         (lambda (i) (string-equal (car i) block-name))
-                         unicode-fonts-block-font-mapping))
-         (block-fonts (cadr (nth block-idx unicode-fonts-block-font-mapping)))
-         (updated-block (cl-substitute new-font old-font block-fonts :test 'string-equal)))
-    (setf (cdr (nth block-idx unicode-fonts-block-font-mapping))
-          `(,updated-block))))
-
-(use-package unicode-fonts
-  :custom
-  (unicode-fonts-skip-font-groups '(low-quality-glyphs))
-  :config
-  ;; Fix the font mappings to use the right emoji font
-  (mapcar
-   (lambda (block-name)
-     (dw/replace-unicode-font-mapping block-name "Apple Color Emoji" "Noto Color Emoji"))
-   '("Dingbats"
-     "Emoticons"
-     "Miscellaneous Symbols and Pictographs"
-     "Transport and Map Symbols"))
-  (unicode-fonts-setup))
-
-(use-package unicode-fonts
-  :straight t
-  :if (not dw/is-termux)
-  :custom
-  (unicode-fonts-skip-font-groups '(low-quality-glyphs))
-  :config
-  ;; Fix the font mappings to use the right emoji font
-  (mapcar
-   (lambda (block-name)
-     (dw/replace-unicode-font-mapping block-name "Apple Color Emoji" "Noto Color Emoji"))
-   '("Dingbats"
-     "Emoticons"
-     "Miscellaneous Symbols and Pictographs"
-     "Transport and Map Symbols"))
-  (unicode-fonts-setup))
+;;TEMPORARILY DISABLED  
+;; (defun dw/replace-unicode-font-mapping (block-name old-font new-font)
+;;   (let* ((block-idx (cl-position-if
+;;                          (lambda (i) (string-equal (car i) block-name))
+;;                          unicode-fonts-block-font-mapping))
+;;          (block-fonts (cadr (nth block-idx unicode-fonts-block-font-mapping)))
+;;          (updated-block (cl-substitute new-font old-font block-fonts :test 'string-equal)))
+;;     (setf (cdr (nth block-idx unicode-fonts-block-font-mapping))
+;;           `(,updated-block))))
+;;  
+;; (use-package unicode-fonts
+;;   :custom
+;;   (unicode-fonts-skip-font-groups '(low-quality-glyphs))
+;;   :config
+;;   ;; Fix the font mappings to use the right emoji font
+;;   (mapcar
+;;    (lambda (block-name)
+;;      (dw/replace-unicode-font-mapping block-name "Apple Color Emoji" "Noto Color Emoji"))
+;;    '("Dingbats"
+;;      "Emoticons"
+;;      "Miscellaneous Symbols and Pictographs"
+;;      "Transport and Map Symbols"))
+;;   (unicode-fonts-setup))
+;;  
+;; (use-package unicode-fonts
+;;   :straight t
+;;   :if (not dw/is-termux)
+;;   :custom
+;;   (unicode-fonts-skip-font-groups '(low-quality-glyphs))
+;;   :config
+;;   ;; Fix the font mappings to use the right emoji font
+;;   (mapcar
+;;    (lambda (block-name)
+;;      (dw/replace-unicode-font-mapping block-name "Apple Color Emoji" "Noto Color Emoji"))
+;;    '("Dingbats"
+;;      "Emoticons"
+;;      "Miscellaneous Symbols and Pictographs"
+;;      "Transport and Map Symbols"))
+;;   (unicode-fonts-setup))
 
 ;; visual line mode and centering
 
@@ -103,6 +104,17 @@
   (setq evil-auto-indent nil)
   (diminish org-indent-mode))
 
+(defun my/org-classic-display (&optional arg)
+  "Use classic display parameters for org file.
+Useful with wide tables or fixed-width text alignment."
+  (interactive "P")
+  (variable-pitch-mode -1)
+  (visual-line-mode -1)
+  (org-indent-mode -1)
+  (when (and arg (fboundp #'turn-on-stripe-table-mode))
+    (turn-on-stripe-table-mode)))
+
+(use-package org-indent) ;; ATTN: need org-indent-mode to be loaded so org-indent face is available
 (use-package org
   :init (progn
           (add-my-hook org-load-hook
@@ -115,7 +127,7 @@
                   '((sequence "TODO" "WAIT" "DONE")))
             (setq org-agenda-custom-commands '(("A" "Agenda for two week span" agenda ""
                                                 ((org-agenda-span 14) (org-agenda-start-day "-1mon")))))
-            (setq-default org-tags-column -116))  ;; -96 a good generic choice, -116 better in practice; convert to a function
+            (setq-default org-tags-column -116)) ;; -96 a good generic choice, -116 better in practice; convert to a function
           (add-my-hook org-mode-hook
             (setq org-file-apps
                   '((auto-mode . emacs)
@@ -175,6 +187,8 @@
             ;; Ensure that anything that should be fixed-pitch in Org files appears that way
             (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
             (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+            (set-face-attribute 'org-link nil  :inherit 'fixed-pitch)
+            (set-face-attribute 'org-date nil  :inherit 'fixed-pitch)
             (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
             (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
             ;; ATTN: This does not always seem to work for some reason

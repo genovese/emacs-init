@@ -8,12 +8,17 @@
 ;;        '(js2smp--magic-space t keymap js2smp--magic-map)))
 ;; e.g., replace js2smp--magic-map by
 ;;
-;;      ,(map-elt js2smp--magic-maps open-key (js2smp--default-magic-map close-key))
+;;      ,(map-elt js2smp--magic-maps (string open-key close-key) (js2smp--default-magic-map open-key close-key))
 ;; where a ` is used instead of ' earlier. The js2smp--magic-maps is an alist or hash
 ;; that (eventually) can customized and is initially nil. The default-magic map
 ;; function includes tab, return, ;, close-key (checked for stringized version),
 ;; and maybe the slurp/expand keys (still tbd) and so will be useful for most
-;; current purposes.
+;; current purposes. Can extend this to have classes at this level, but seems better to asssociate
+;; the (string open-key close-key) pairs with classes within the customized maps.
+;;
+;; Q: How much of this functionality is implementable in smart-parens customization??
+;; My current thinking is to provide a shim to add this to smart-parens if one is using it and
+;; otherwise do it natively.
 
 (defun js2-inside-string-or-comment-p ()
   "Are we currently inside a string or comment?"
