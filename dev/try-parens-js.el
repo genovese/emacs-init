@@ -1,3 +1,5 @@
+(require 'map)
+
 ;; ATTN: Need to have separate escape keymaps for (at least) string versus delimiter pairs
 ;; For instance, typing 'a${index}' will be escaped by the second } inappropriately.
 ;; Perhaps need to have `escape classes` that determine the keymap in the magic space.
@@ -112,13 +114,67 @@ applies to any region from point forward."
   "Keymap active in fresh space in the middle of a new smart open paren.")
 (fset 'js2smp--magic-map js2smp--magic-map)
 
+(defvar js2smp--magic-base-map
+  (let ((m (make-sparse-keymap)))
+    (define-key m (kbd ",") 'js2smp--paren-comma)
+    (define-key m (kbd "<return>") 'js2smp--paren-escape-return)
+    ;; Consider whether TAB better for this or completion
+    (define-key m (kbd "<tab>") 'js2smp--paren-escape)
+    (define-key m (kbd ";") 'js2smp--paren-escape-semicolon)
+    (define-key m (kbd "C-;") 'js2smp--paren-expand)
+    (define-key m (kbd "M-;") 'js2smp--paren-slurp)
+    m)
+  "Base keymap active in fresh space in the middle of a new smart
+  open paren. This will be augmented for the particular
+  open-close context")
+
+(defun js2smp--the-magic-map (close &optional close-type extra-bindings)
+  "ATTN:   close-type can be nil, t, 'string, or a function"
+  (let ((m (make-sparse-keymap))
+        (escape (cond
+                 ((eq close-type 'string)
+                  'js2smp--paren-escape-or-string)
+                 ((functionp close-type)
+                  close-type)
+                 (t
+                  'js2smp--paren-escape)))
+        (key (kbd (string close))))
+    (set-keymap-parent m js2smp--magic-base-map)
+    (define-key m key escape)
+    (dolist (binding extra-bindings)
+      (define-key m (car binding) (cadr binding)))
+    m)) 
+
+(defun js2smp--magic-space (close &optional close-type extra-bindings)
+  ""
+  `(" "
+    '(let ((pt (point)))
+       (add-text-properties
+        (1- pt) pt
+        '(js2smp--magic-space t keymap ,(js2smp--the-magic-map close close-type extra-bindings))))))
+
 (defvar js2smp--match-table
-  '((?\( . ?\))
-    (?\[ . ?\])
-    (?\{ . ?\})
-    (?\" . ?\")
-    (?\' . ?\')
-    (?\` . ?\`)))
+  '((?\( ?\))
+    (?\[ ?\])
+    (?\{ ?\}
+         :content (lambda (open close &optional policies)
+                    (let ((limit (line-beginning-position)))
+                      (if (looking-back "=>\\s-*\\|)\\s-*" limit)
+                          `(,open \n _ _ \n ,close ";" >)
+                        `(,open _ _ ,@(js2smp--magic-space close (map-elt policies :close-type) (map-elt policies :bindings)) ,close)
+                        )))
+         :pre (lambda ()
+                (let ((limit (line-beginning-position)))
+                  (when (looking-back "=>\\s-*\\|)\\s-*" limit)
+                    (delete-horizontal-space t)
+                    (insert " ")))))
+    (?\" ?\"
+         :close-type string)
+    (?\' ?\'
+         :close-type string)
+    (?\` ?\`
+         :close-type string
+         :content " ")))
 
 (defun js2-smart-pair-open (&optional literal)
   "Inserts properly a properly spaced paren pair with an active keymap inside.
@@ -130,24 +186,28 @@ keeping point on the special space character. "
   (if (or literal (js2-inside-string-or-comment-p))
       (self-insert-command (if (integerp literal) literal 1))
     (let* ((this-key last-command-event)
-           (match-key (cdr (assoc this-key js2smp--match-table))))
-      (js2-smart-pair-open* this-key match-key))))
+           (match-info (assoc this-key js2smp--match-table))
+           (match-key (cadr match-info)))
+      (js2-smart-pair-open* this-key match-key (cddr match-info)))))
 
-(defun js2-smart-pair-open* (open-key close-key)
+(defun js2-smart-pair-open* (open-key close-key &optional policies)
   "Inserts properly a properly spaced paren pair with an active keymap inside.
 Point is left in the middle of the paren pair and associated with
 a special keymap, where tab deletes the extra space and moves
 point out of the parentheses and comma inserts a spaced comma,
 keeping point on the special space character. "
   (interactive "P")
+  (when-let ((pre (map-elt policies :pre)))
+    (funcall pre))
   (let* ((skeleton-pair t)
-         (skeleton-pair-alist `((,open-key
-                                 _ _ " "
-                                 '(let ((pt (point)))
-                                    (add-text-properties
-                                     (1- pt) pt
-                                     '(js2smp--magic-space t keymap js2smp--magic-map)))
-                                 ,close-key))))
+         (content (or (map-elt policies :content)
+                      (js2smp--magic-space close-key (map-elt policies :close-key) (map-elt policies :bindings))))
+         (skeleton (cond ((functionp content)
+                          (funcall content open-key close-key policies))
+                         ((listp content)
+                          `(,open-key _ _ ,@content ,close-key))
+                         t `(,open-key _ _ ,content ,close-key)))
+         (skeleton-pair-alist (list skeleton)))
     (skeleton-pair-insert-maybe nil)))
 
 (defun js2-smart-pair-setup ()
