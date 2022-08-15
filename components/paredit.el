@@ -24,7 +24,7 @@ linked into `minor-mode-map-alist'."
 
 (use-package paredit  
   :init
-  (setq my/paredit-commands ;; changes from default marked with ;CRG
+  (setq my/paredit-commands ;; changes from default marked with ; CRG
         `("Basic Insertion Commands"
           ("("         paredit-open-round
            ("(a b |c d)"
@@ -131,7 +131,7 @@ linked into `minor-mode-map-alist'."
            (";;;| Frobnicate\n(defun frobnicate ...)"
             ";;;|\n(defun frobnicate ...)"
             ";;;\n(| frobnicate ...)"))
-          ("M-h" ;CRG  -- was ,(concat "M-" paredit-backward-delete-key)
+          ("M-h" ; CRG  -- was ,(concat "M-" paredit-backward-delete-key)
            paredit-backward-kill-word
            ("(foo bar)    ; baz\n(quux)|"
             "(foo bar)    ; baz\n(|)"
@@ -215,6 +215,7 @@ linked into `minor-mode-map-alist'."
            ("hello-\n|  world"
             "hello-|world"))
           (("M-i RET" "C-c C-M-l") paredit-recenter-on-sexp) ; CRG -- added mine
+          ("M-i w"     paredit-wrap-sexp) ; CRG
           ("M-q"       paredit-reindent-defun)))
   :config (progn
             (paredit-reset-commands my/paredit-commands)

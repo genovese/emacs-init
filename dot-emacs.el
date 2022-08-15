@@ -38,6 +38,7 @@
     (let* ((ltype (s-str (or type "")))
            (ltype (if (keywordp type) (substring ltype 1) ltype))
            (file  (f-join init-dir ltype (s-str name))))
+      (message ">>> %s %s %s" init-dir file ltype)
       (condition-case err
           (load file)
         (error (signal
