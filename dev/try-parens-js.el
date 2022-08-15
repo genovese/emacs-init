@@ -32,10 +32,10 @@
   (let ((node-name (js2-node-short-name (js2-node-at-point))))
     (string-equal node-name "js2-string-node")))
 
-(defun js2smp--paren-escape ()
+(defun js2smp--paren-escape (&optional keep-space)
   "Escape paren pair, deleting magic space if starting there."
-  (interactive)
-  (when (= (char-after) ?\ ) (delete-char 1))
+  (interactive "P")
+  (when (= (char-after) ?\ ) (delete-char 1) (when keep-space (insert " ")))
   (up-list 1 t t))  ;; formerly 1 t,  the second t helps with ''; does it break anything?
 
 (defun js2smp--paren-escape-or-string ()
@@ -50,6 +50,12 @@
   (interactive)
   (js2smp--paren-escape)
   (insert ";"))
+
+(defun js2smp--paren-escape-equals ()
+  "Escape paren pair, deleting magic space if starting there."
+  (interactive)
+  (js2smp--paren-escape)
+  (insert " = "))
 
 (defun js2smp--paren-escape-return ()
   "Escape paren pair, deleting magic space if starting there."
@@ -159,22 +165,34 @@ applies to any region from point forward."
     (?\{ ?\}
          :content (lambda (open close &optional policies)
                     (let ((limit (line-beginning-position)))
-                      (if (looking-back "=>\\s-*\\|)\\s-*" limit)
-                          `(,open \n _ _ \n ,close ";" >)
-                        `(,open _ _ ,@(js2smp--magic-space close (map-elt policies :close-type) (map-elt policies :bindings)) ,close)
-                        )))
+                      (cond
+                       ;; arrow function defs
+                       ((looking-back "=>\\s-*" limit) 
+                        `(,open \n _ _ \n ,close ";" >))
+                       ;; const, let, var with destructuring assignment should be objects
+                       ((looking-back "\\(?:const\\|let\\|var\\)\\s-*" limit)
+                        `(,open _ _ ,@(js2smp--magic-space close
+                                                           (map-elt policies :close-type)
+                                                           (cons
+                                                            '("=" js2smp--paren-escape-equals)
+                                                            (map-elt policies :bindings)))
+                                ,close))
+                       ;; after control flow, function and class defs, else, try
+                       ((looking-back "\\(?:)\\|[A-Za-z_]\\)\\s-*" limit)
+                        `(,open \n _ _ \n ,close >))                       
+                       (t
+                        `(,open _ _ ,@(js2smp--magic-space close
+                                                           (map-elt policies :close-type)
+                                                           (map-elt policies :bindings))
+                                ,close)))))
          :pre (lambda ()
                 (let ((limit (line-beginning-position)))
-                  (when (looking-back "=>\\s-*\\|)\\s-*" limit)
+                  (when (looking-back "\\(?:=>\\|)\\|[A-Za-z_]\\)\\s-*" limit)
                     (delete-horizontal-space t)
                     (insert " ")))))
-    (?\" ?\"
-         :close-type string)
-    (?\' ?\'
-         :close-type string)
-    (?\` ?\`
-         :close-type string
-         :content " ")))
+    (?\" ?\" :close-type string)
+    (?\' ?\' :close-type string)
+    (?\` ?\` :close-type string :content " ")))  ;; use :content " " to suppresss magic space completely
 
 (defun js2-smart-pair-open (&optional literal)
   "Inserts properly a properly spaced paren pair with an active keymap inside.
@@ -206,7 +224,7 @@ keeping point on the special space character. "
                           (funcall content open-key close-key policies))
                          ((listp content)
                           `(,open-key _ _ ,@content ,close-key))
-                         t `(,open-key _ _ ,content ,close-key)))
+                         (t `(,open-key _ _ ,content ,close-key))))
          (skeleton-pair-alist (list skeleton)))
     (skeleton-pair-insert-maybe nil)))
 

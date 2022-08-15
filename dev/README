@@ -1,0 +1,18 @@
+* For JS/React
+
+  Load
+  1. js-fixes.el
+  2. try-parens-js.el
+  3. try-lsp-js.el
+
+  Need to fix up company box.  Create fixed local version here.
+
+  This is still good but check font remappings before auto include.
+  Recursive definitions of remappings in company box cause faces
+  to be poorly defined.
+  
+;;(use-package company-box
+;;  :hook (company-mode . company-box-mode))
+
+
+     

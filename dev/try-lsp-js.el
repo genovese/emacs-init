@@ -40,8 +40,9 @@
   :config (with-eval-after-load 'lsp-mode
             (bind-key "<tab>" #'company-indent-or-complete-common lsp-mode-map)))
 
-(use-package company-box
-  :hook (company-mode . company-box-mode))
+;; This is still good but check font remappings before auto include
+;;(use-package company-box
+;;  :hook (company-mode . company-box-mode))
 
 (defun my/lsp-mode-hook ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))

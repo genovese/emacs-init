@@ -1,0 +1,380 @@
+* Dev Loads
+  In ~/.emacs.d/init/dev/, load:
+   
+  + ~/.emacs.d/init/dev/general.el
+  + ~/.emacs.d/init/dev/keys.el
+  + ~/.emacs.d/init/dev/try-parens-js.el
+  + ~/.emacs.d/init/dev/try-lsp-js.el
+  + ~/.emacs.d/init/dev/jsx-fixes.el
+
+  #+begin_src emacs-lisp :results silent
+    (load-file "~/.emacs.d/init/dev/general.el")
+    (load-file "~/.emacs.d/init/dev/keys.el")
+    (load-file "~/.emacs.d/init/dev/try-parens-js.el")
+    (load-file "~/.emacs.d/init/dev/try-lsp-js.el")
+    (load-file "~/.emacs.d/init/dev/jsx-fixes.el")
+  #+end_src
+
+* Origami
+
+  #+begin_src emacs-lisp :results silent
+    (require 'origami)
+    (add-to-list 'origami-parser-alist '(clojurescript-mode . origami-clj-parser))  
+    
+    (defhydra origami-hydra (:hint nil)
+      "
+               ^Move^        ^Open/Close^          ^Other^
+          ---------------------------------------------------------------
+          [_C-n_] Next Line  [_o_]   Open          [_f_] Forward Fold
+          [_C-p_] Prev Line  [_O_]   Open All      [_b_] Backward Fold
+          [_C-w_] Scroll Dn  [_C-o_] Open recurs   [_n_] Next Fold
+          [_C-v_] Scroll Up  [_c_]   Close         [_p_] Prev Fold
+          [_M-w_] Beg Buff   [_C_]   Close All     [_F_] F same level
+          [_M-v_] End Buf    [_C-c_] Close recurs  [_,_] F toggle
+          [_l_]   Repos      [_s_]   Show Open     [_t_] Toggle
+          [_L_]   Recenter   [_SPC_] Toggle recurs [_q_] Quit
+          ...                Arrows move f/b and toggle nodes
+         "
+      ("c" origami-close-node)
+      ("C" origami-close-all-nodes)
+      ("C-c" origami-close-node-recursively)
+      ("o" origami-open-node)
+      ("O" origami-open-all-nodes)
+      ("C-o" origami-open-node-recursively)
+      ("t" origami-toggle-node)
+      ("SPC" origami-recursively-toggle-node)
+      ("s" origami-show-only-node)
+      ("f" origami-forward-fold)
+      ("F" origami-forward-fold-same-level)
+      ("," origami-forward-toggle-node)
+      ("b" origami-backward-fold-same-level)
+      ("n" origami-next-fold)
+      ("p" origami-previous-fold)
+      ("<left>" origami-backward-fold-same-level)
+      ("<right>" origami-forward-fold-same-level)
+      ("<up>" origami-toggle-node)
+      ("<down>" origami-recursively-toggle-node)
+      ("C-n" next-line)
+      ("C-p" previous-line)
+      ("C-a" my/move-beginning-of-line)
+      ("C-e" move-end-of-line)
+      ("C-f" forward-char)
+      ("C-b" backward-char)
+      ("M-f" forward-word)
+      ("M-b" backward-word)
+      ("M-C-f" forward-sexp-or-char)
+      ("M-C-b" backward-sexp-or-char)
+      ("M-w" beginning-of-buffer)
+      ("M-v" end-of-buffer)
+      ("C-w" cua-scroll-down)
+      ("C-v" cua-scroll-up)
+      ("l" reposition-window)
+      ("L" recenter-top-bottom)
+      ("q" nil))
+    
+    (define-prefix-command 'my/origami-prefix nil
+      "Origami mode keys")
+    (define-key my/origami-prefix "c" 'origami-close-node)
+    (define-key my/origami-prefix "C" 'origami-close-all-nodes)
+    (define-key my/origami-prefix "o" 'origami-open-node)
+    (define-key my/origami-prefix "O" 'origami-open-all-nodes)
+    (define-key my/origami-prefix "t" 'origami-toggle-node)
+    (define-key my/origami-prefix " " 'origami-recursively-toggle-node)
+    (define-key my/origami-prefix "f" 'origami-forward-fold)
+    (define-key my/origami-prefix "F" 'origami-forward-toggle-node)
+    (define-key my/origami-prefix "b" 'origami-backward-fold-same-level)
+    (define-key my/origami-prefix "n" 'origami-next-fold)
+    (define-key my/origami-prefix "p" 'origami-previous-fold)
+    (define-key my/origami-prefix ";" 'origami-hydra/body)
+    (define-key my/origami-prefix (kbd "RET") 'origami-hydra/body)
+    
+    (global-set-key (kbd "C-M-;") 'my/origami-prefix)
+  #+end_src
+
+* Cider
+
+  Load ~/Projects/mathlingo/src/cider-node.el
+   
+  #+begin_src emacs-lisp :results silent
+    (load-file "~/Projects/Mathlingo/src/cider-node.el")
+    (define-key cider-repl-mode-map (kbd "C-c C-d C-o") #'cider-node-hideshow-output-buffer)
+    (define-key cider-repl-mode-map (kbd "C-c C-d C-p") #'cider-start-shadow-node-client)
+    (define-key cider-repl-mode-map (kbd "C-c C-d C-q") #'cider-quit-shadow-node-client)
+    
+    (setq cider-preferred-build-tool 'shadow-cljs)
+    (setq ivy-sort-matches-functions-alist '((t)
+     (ivy-completion-in-region . ivy--shorter-matches-first)))
+  #+end_src
+
+  Fixed bug in cljr used with cider
+
+  #+begin_src emacs-lisp :results silent
+    (defun cljr--search-forward-within-sexp* (s &optional save-excursion)
+      "Searches forward for S in the current sexp.
+    
+    if SAVE-EXCURSION is T POINT does not move."
+      (let ((bound (save-excursion (forward-list 1) (point))))
+        (if save-excursion
+            (save-excursion
+              (re-search-forward s bound t))
+          (re-search-forward s bound t))))
+    
+    (defun cljr--insert-in-ns* (type &optional cljs?)
+      "Insert another clause into the TYPE clause of the ns statement.
+    
+    TYPE is :require, :use etc
+    
+    If CLJS? is T we insert in the cljs part of the ns declaration."
+      (cljr--goto-ns)
+      (when cljs?
+        (cljr--goto-cljs-branch))
+      (if (cljr--search-forward-within-sexp* (concat "(" type "\\(?:$\\|[^-a-zA-Z]\\)"))
+          (if (looking-at " *)")
+              (progn
+                (search-backward "(")
+                (forward-list 1)
+                (forward-char -1)
+                (insert " "))
+            (search-backward "(")
+            (forward-list 1)
+            (forward-char -1)
+            (newline-and-indent))
+        (forward-list 1)
+        (forward-char -1)
+        (newline-and-indent)
+        (insert "(" type " )")
+        (forward-char -1)))
+    
+    (defun cljr-slash ()
+      "Inserts / as normal, but also checks for common namespace shorthands to require.
+    If `cljr-magic-requires' is non-nil, executing this command after one of the aliases
+    listed in `cljr-magic-require-namespaces', or any alias used elsewhere in the project,
+    will add the corresponding require statement to the ns form."
+      (interactive)
+      (insert "/")
+      (when-let (aliases (and cljr-magic-requires
+                              (not (cljr--in-map-destructuring?))
+                              (not (cljr--in-ns-above-point-p))
+                              (not (cljr--in-reader-literal-p))
+                              (not (cider-in-comment-p))
+                              (not (cider-in-string-p))
+                              (not (cljr--in-keyword-sans-alias-p))
+                              (not (cljr--in-number-p))
+                              (clojure-find-ns)
+                              (cljr--magic-requires-lookup-alias)))
+        (let ((short (cl-first aliases)))
+          (when-let (long (cljr--prompt-user-for "Require " (cl-second aliases)))
+            (when (and (not (cljr--in-namespace-declaration-p (concat ":as " short "\b")))
+                       (or (not (eq :prompt cljr-magic-requires))
+                           (not (> (length (cl-second aliases)) 1)) ; already prompted
+                           (yes-or-no-p (format "Add %s :as %s to requires?" long short))))
+              (save-excursion
+                (cljr--insert-in-ns* ":require")
+                (let ((libspec (format "[%s :as %s]" long short)))
+                  (insert libspec)
+                  (ignore-errors (cljr--maybe-eval-ns-form))
+                  (cljr--indent-defun)
+                  (cljr--post-command-message "Required %s" libspec))))))))
+  #+end_src
+
+  It just replaces the =cljr--insert-in-ns= with =cljr--insert-in-ns*= that in turn
+  replaces =cljr--search-forward-within-sexp= with a version that uses re-search
+  to avoid prefix matches.
+
+* Clojure(Script)
+
+** Indents
+
+   #+begin_src emacs-lisp :results silent
+     (progn
+       ;; Clojure core macros
+       (put-clojure-indent '-> 1)
+       (put-clojure-indent '->> 1)
+       (put-clojure-indent 'as-> 1)
+       (put-clojure-indent 'as->> 1)
+       (put-clojure-indent 'some-> 1)
+    
+       ;; Testing
+       (put-clojure-indent 'prop/for-all 1)
+    
+       ;; Mathlingo
+       (put-clojure-indent 'expected-case* 1)
+       (put-clojure-indent 'n/expected-case* 1)
+       (put-clojure-indent 'n/expected-case 1)
+       (put-clojure-indent 'expected-case 1)
+       (put-clojure-indent 'ps/parser-body 1)
+       (put-clojure-indent 'parser-body 1)
+       (put-clojure-indent 'ps/defparser 'defn)
+       (put-clojure-indent 'defparser 'defn))
+   #+end_src
+
+** IDE Features
+   #+begin_src emacs-lisp :results silent
+     (setq company-idle-delay 0.5)
+   #+end_src
+
+* Org
+
+  Loaded:
+
+  org-comment-line-break-function
+  org-babel-demarcate-block
+
+  from ~/.emacs.d/init/dev/try-scr.el
+
+  Loaded:
+  org-lecture.el
+  ole-emphasize.el
+
+  from ~/class/s750/course-materials/src
+
+  NOTE: changed =inherit= property of =org-table= face to =default=, rather than =fixed-pitch= via customize
+  because fixed-pitch caused tables to misalign.
+
+  #+begin_src emacs-lisp :results silent
+    (defun org-comment-line-break-function (&optional soft)
+      "Break line at point and indent, continuing comment if within one.
+    The inserted newline is marked hard if variable
+    `use-hard-newlines' is true, unless optional argument SOFT is
+    non-nil."
+      (if soft (insert-and-inherit ?\n) (newline 1))
+      (save-excursion (forward-char -1) (delete-horizontal-space))
+      (delete-horizontal-space)
+      (indent-to-left-margin)
+      (if fill-prefix
+          (insert-before-markers-and-inherit fill-prefix)
+        (insert-before-markers-and-inherit)))
+    
+    (defun org-babel-demarcate-block (&optional arg)
+      "Wrap or split the code in the region or on the point.
+    When called from inside of a code block the current block is
+    split.  When called from outside of a code block a new code block
+    is created.  In both cases if the region is demarcated and if the
+    region is not active then the point is demarcated."
+      (interactive "P")
+      (let* ((info (org-babel-get-src-block-info 'light))
+             (start (org-babel-where-is-src-block-head))
+             (block (and start (match-string 0)))
+             (headers (and start (match-string 4)))
+             (stars (concat (make-string (or (org-current-level) 1) ?*) " "))
+             (upper-case-p (and block
+                                (let (case-fold-search)
+                                  (string-match-p "#\\+BEGIN_SRC" block)))))
+        (if info
+            (mapc
+             (lambda (place)
+               (save-excursion
+                 (goto-char place)
+                 (let ((lang (nth 0 info))
+                       (indent (make-string (current-indentation) ?\s)))
+                   (when (string-match "^[[:space:]]*$"
+                                       (buffer-substring (point-at-bol)
+                                                         (point-at-eol)))
+                     (delete-region (point-at-bol) (point-at-eol)))
+                   (insert (concat
+                            (if (looking-at "^") "" "\n")
+                            indent (if upper-case-p "#+END_SRC\n" "#+end_src\n")
+                            (if arg stars indent) "\n"
+                            indent (if upper-case-p "#+BEGIN_SRC " "#+begin_src ")
+                            lang
+                            (if (> (length headers) 1)
+                                (concat " " headers) headers)
+                            (if (looking-at "[\n\r]")
+                                ""
+                              (concat "\n" (make-string (current-column) ? )))))))
+               (move-end-of-line 2))
+             (sort (if (org-region-active-p) (list (mark) (point)) (list (point))) #'>))
+          (let ((start (point))
+                (lang (completing-read
+                       "Lang: "
+                       (mapcar #'symbol-name
+                               (delete-dups
+                                (append (mapcar #'car org-babel-load-languages)
+                                        (mapcar (lambda (el) (intern (car el)))
+                                                org-src-lang-modes))))))
+                (body (delete-and-extract-region
+                       (if (org-region-active-p) (mark) (point)) (point)))
+                (new-start (progn
+                             (forward-line 0)
+                             (unless (looking-at "^[:blank:]*$")
+                               (end-of-line)
+                               (insert "\n"))
+                             (point))))
+            (insert (concat (if arg (concat stars "\n") "")
+                            (if upper-case-p "#+BEGIN_SRC " "#+begin_src ")
+                            lang "\n" body
+                            (cond
+                             ((= (length body) 0)
+                              "\n")  ; (concat (make-string (+ (length stars) 2) ? ) "\n")
+                             ((or (string-suffix-p "\n" body)
+                                  (string-suffix-p "\r" body))
+                              "")
+                             (t
+                              "\n"))
+                            (if upper-case-p "#+END_SRC\n" "#+end_src\n")))
+            (let ((end (point)))
+              (goto-char new-start)
+              (save-excursion
+                (while (< (point) end)
+                 (org-indent-line)
+                 (forward-line 1))))
+            (forward-line 1)
+            (skip-chars-forward " \t")))))
+    
+    (load-file "~/class/s750/course-materials/src/org-lecture.el")
+    (load-file "~/class/s750/course-materials/src/ole-emphasize.el")
+  #+end_src
+
+* Other (in order)
+
+  Tried to smooth horizontal scrolling
+
+  #+begin_src emacs-lisp :results silent
+    (setq hscroll-step 8)
+  #+end_src
+
+* Other
+
+** A nice test automation tool: eval region wrapped in a function
+
+   #+begin_src emacs-lisp
+     (defun srr (start end)
+       (interactive "r")
+       (cider-interactive-eval (format "(cljs.user/srr %s)" (buffer-substring-no-properties start end))
+                               (cider-simple-eval-handler)))
+     
+     (defun cider-simple-eval-handler ()
+       "Make an interactive eval handler for BUFFER.
+     PLACE is used to display the evaluation result.
+     If non-nil, it can be the position where the evaluated sexp ends,
+     or it can be a list with (START END) of the evaluated region.
+     Update the cider-inspector buffer with the evaluation result
+     when `cider-auto-inspect-after-eval' is non-nil."
+     
+       (let* ((eval-buffer (current-buffer))
+              (buffer nil)
+              (beg nil)
+              (end nil)
+              (fringed nil))
+         (nrepl-make-response-handler (or buffer eval-buffer)
+                                      (lambda (_buffer value)
+                                        (if beg
+                                            (unless fringed
+                                              (cider--make-fringe-overlays-for-region beg end)
+                                              (setq fringed t))
+                                          (cider--make-fringe-overlay end))
+                                        (kill-new (format "%s" value))
+                                        (set-register ?i (format "%s" value))
+                                        (cider--display-interactive-eval-result value end))
+                                      (lambda (_buffer out)
+                                        (cider-emit-interactive-eval-output out))
+                                      (lambda (_buffer err)
+                                        (cider-emit-interactive-eval-err-output err)
+                                        (cider-handle-compilation-errors err eval-buffer))
+                                      (when (and cider-auto-inspect-after-eval
+                                                 (boundp 'cider-inspector-buffer)
+                                                 (windowp (get-buffer-window cider-inspector-buffer 'visible)))
+                                        (lambda (buffer)
+                                          (cider-inspect-last-result)
+                                          (select-window (get-buffer-window buffer)))))))
+   #+end_src
