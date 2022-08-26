@@ -6,6 +6,7 @@
   + ~/.emacs.d/init/dev/try-parens-js.el
   + ~/.emacs.d/init/dev/try-lsp-js.el
   + ~/.emacs.d/init/dev/jsx-fixes.el
+  + ~/.emacs.d/init/dev/latex-mods.el
 
   #+begin_src emacs-lisp :results silent
     (load-file "~/.emacs.d/init/dev/general.el")
@@ -13,6 +14,7 @@
     (load-file "~/.emacs.d/init/dev/try-parens-js.el")
     (load-file "~/.emacs.d/init/dev/try-lsp-js.el")
     (load-file "~/.emacs.d/init/dev/jsx-fixes.el")
+    (load-file "~/.emacs.d/init/dev/latex-mods.el")
   #+end_src
 
 * Origami

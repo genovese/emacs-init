@@ -59,6 +59,7 @@
     ("#" mc/insert-numbers)
     ("z" mc/insert-letters)
     ("o" mc/mark-pop)
+    ("x" mc/repeat-command)
     ("q" nil))
   :bind ("C-9" . hydra-multiple-cursors/body)
   :demand t)
